@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.hdl.m3u8.M3U8Manger;
+import com.hdl.m3u8.bean.M3U8;
 import com.hdl.m3u8.bean.M3U8Listener;
 import com.hdl.m3u8demo.runtimepermissions.PermissionsManager;
 import com.hdl.m3u8demo.runtimepermissions.PermissionsResultAction;
@@ -34,10 +35,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onDownload(View view) {
-        String url = "http://gwell-oss-test1.oss-cn-shenzhen.aliyuncs.com/video-123yun/2017-07-20%2010%3A00%3A00.m3u8?Expires=1500945273&OSSAccessKeyId=LTAIAxqhixFoJsvp&Signature=lei8%2F1GW9cEA7Qkeh2R9GCkMPGg%3D";
+        String url = "http://gwell-oss-test1.oss-cn-shenzhen.aliyuncs.com/video-123yun/2017-07-17%2017%3A00%3A00.m3u8?Expires=1501036405&OSSAccessKeyId=LTAIAxqhixFoJsvp&Signature=zfkPv4QtRNPETyL31BUzx4U%2FpHU%3D";
         M3U8Manger.getInstance()
                 .setUrl(url)
-                .setSaveFilePath("/sdcard/11/"+System.currentTimeMillis()+".ts")
+                .setSaveFilePath("/sdcard/11/" + System.currentTimeMillis() + ".ts")
                 .download(new M3U8Listener() {
                     @Override
                     public void onStart() {
@@ -56,6 +57,44 @@ public class MainActivity extends AppCompatActivity {
                         Log.e("hdltag", "onCompleted(MainActivity.java:33):下载完成了");
                         Toast.makeText(MainActivity.this, "完成", Toast.LENGTH_SHORT).show();
                     }
+
+                    @Override
+                    public void onM3U8Info(M3U8 m3U8) {
+
+                    }
                 });
     }
+
+    public void onGetInfo(View view) {
+        String url = "http://gwell-oss-test1.oss-cn-shenzhen.aliyuncs.com/video-123yun/2017-07-17%2017%3A00%3A00.m3u8?Expires=1501036405&OSSAccessKeyId=LTAIAxqhixFoJsvp&Signature=zfkPv4QtRNPETyL31BUzx4U%2FpHU%3D";
+        M3U8Manger.getInstance()
+                .setUrl(url)
+                .getM3U8(new M3U8Listener() {
+                    @Override
+                    public void onStart() {
+                        Log.e("hdltag", "onStart(MainActivity.java:75):开始了" );
+                    }
+
+                    @Override
+                    public void onError(Throwable errorMsg) {
+                        Log.e("hdltag", "onStart(MainActivity.java:75):出错了"+errorMsg );
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                        Log.e("hdltag", "onStart(MainActivity.java:75):完成了" );
+                    }
+
+                    @Override
+                    public void onM3U8Info(M3U8 m3U8) {
+                        Log.e("hdltag", "onStart(MainActivity.java:75):拿到结果了"+m3U8 );
+                        Log.e("hdltag", "onM3U8Info(MainActivity.java:91):" + m3U8.getTsList());
+                    }
+                });
+    }
+
+    public void onStop(View view) {
+        M3U8Manger.getInstance().stop();
+    }
+
 }

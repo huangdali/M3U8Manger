@@ -6,6 +6,6 @@ package com.hdl.m3u8.bean;
  */
 
 public abstract class M3U8Listener implements DownLoadListener {
-    public void onM3U8Info(long startTime, long endTime) {
+    public void onM3U8Info(M3U8 m3U8) {
     }
 }

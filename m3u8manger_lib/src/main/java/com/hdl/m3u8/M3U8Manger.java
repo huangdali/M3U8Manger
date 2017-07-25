@@ -37,20 +37,22 @@ public class M3U8Manger {
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case WHAT_ON_START:
-                    downLoadListener.onStart();
-                    break;
-                case WHAT_ON_ERROR:
-                    downLoadListener.onError((Throwable) msg.obj);
-                    break;
-                case WHAT_ON_GETINFO:
-                    M3U8 m3U8 = (M3U8) msg.obj;
-                    downLoadListener.onM3U8Info(m3U8.getStartTime(), m3U8.getEndTime());
-                    break;
-                case WHAT_ON_COMPLITED:
-                    downLoadListener.onCompleted();
-                    break;
+            if (downLoadListener != null) {
+                switch (msg.what) {
+                    case WHAT_ON_START:
+                        downLoadListener.onStart();
+                        break;
+                    case WHAT_ON_ERROR:
+                        downLoadListener.onError((Throwable) msg.obj);
+                        break;
+                    case WHAT_ON_GETINFO:
+                        M3U8 m3U8 = (M3U8) msg.obj;
+                        downLoadListener.onM3U8Info(m3U8);
+                        break;
+                    case WHAT_ON_COMPLITED:
+                        downLoadListener.onCompleted();
+                        break;
+                }
             }
         }
     };
@@ -86,6 +88,47 @@ public class M3U8Manger {
     }
 
     /**
+     * 停止任务
+     */
+    public synchronized void stop() {
+        isRunning=false;
+        if (executor != null && executor.isTerminated()) {
+            executor.shutdownNow();
+            executor = null;
+        }
+        mHandler.sendEmptyMessage(WHAT_ON_COMPLITED);
+    }
+
+    /**
+     * 获取m3u8
+     *
+     * @param downLoadListener
+     */
+    public synchronized void getM3U8(M3U8Listener downLoadListener) {
+        this.downLoadListener = downLoadListener;
+        if (!isRunning) {
+            new Thread() {
+                @Override
+                public void run() {
+                    isRunning = true;
+                    try {
+                        M3U8 m3u8 = MUtils.parseIndex(url);
+                        isRunning = false;//获取成功之后要复位
+                        sendM3u8Info(m3u8);
+                        mHandler.sendEmptyMessage(WHAT_ON_COMPLITED);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        handlerError(e);
+                    }
+                }
+            }.start();
+        } else {
+            handlerError(new Throwable("Task isRunning"));
+        }
+
+    }
+
+    /**
      * 开始下载了
      */
     private synchronized void startDownload() {
@@ -98,14 +141,15 @@ public class M3U8Manger {
                     M3U8 m3u8 = null;
                     try {
                         m3u8 = MUtils.parseIndex(url);
+                        sendM3u8Info(m3u8);
                     } catch (Exception e) {
                         handlerError(e);
                         return;
                     }
-                    float f = 0;
-                    for (M3U8Ts ts : m3u8.getTsList()) {
-                        f += ts.getSeconds();
-                    }
+//                    float f = 0;
+//                    for (M3U8Ts ts : m3u8.getTsList()) {
+//                        f += ts.getSeconds();
+//                    }
 //                    System.out.println("movie length: " + ((int) f / 60) + "min " + (int) f % 60 + " sec");
                     if (executor != null && executor.isTerminated()) {
                         executor.shutdownNow();
@@ -137,6 +181,18 @@ public class M3U8Manger {
                 }
             }
         }.start();
+    }
+
+    /**
+     * 通知拿到消息
+     *
+     * @param m3u8
+     */
+    private void sendM3u8Info(M3U8 m3u8) {
+        Message msg = mHandler.obtainMessage();
+        msg.obj = m3u8;
+        msg.what = WHAT_ON_GETINFO;
+        mHandler.sendMessage(msg);
     }
 
     /**
@@ -205,7 +261,6 @@ public class M3U8Manger {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-
                 }
             });
 

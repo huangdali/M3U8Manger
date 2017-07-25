@@ -64,7 +64,8 @@ public class M3U8 {
         for (M3U8Ts ts : tsList) {
             sb.append("\nts: " + ts);
         }
-
+        sb.append("\n\nstartTime = "+startTime);
+        sb.append("\n\nendTime = "+endTime);
         return sb.toString();
     }
 }

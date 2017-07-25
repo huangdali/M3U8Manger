@@ -6,10 +6,12 @@
 导入：
 
 ```java
-compile 'com.jwkj:M3U8Manger:v1.0.3'
+compile 'com.jwkj:M3U8Manger:v1.0.4'
 ```
 
-使用：
+获取M3U8信息：
+
+下载M3U8格式的视频文件：
 
 ```java
 M3U8Manger.getInstance()
@@ -33,6 +35,10 @@ M3U8Manger.getInstance()
                 });
 ```
 ## 版本记录
+v1.0.4
+- 【新增】获取M3U8基本信息
+- 【新增】停止任务
+
 v1.0.3
 - 【修复】url失效时抛出异常
 - 【新增】M3U8开始、结束时间
