@@ -1,9 +1,11 @@
 package com.hdl.m3u8;
 
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 
-import com.hdl.m3u8.bean.DownLoadListener;
 import com.hdl.m3u8.bean.M3U8;
+import com.hdl.m3u8.bean.M3U8Listener;
 import com.hdl.m3u8.bean.M3U8Ts;
 import com.hdl.m3u8.utils.MUtils;
 
@@ -20,14 +22,38 @@ import java.util.concurrent.Executors;
  * M3u8管理器
  */
 public class M3U8Manger {
+    private static final int WHAT_ON_START = 166;
+    private static final int WHAT_ON_ERROR = 711;
+    private static final int WHAT_ON_GETINFO = 840;
+    private static final int WHAT_ON_COMPLITED = 625;
+    private static final String KEY_DEFAULT_TEMP_DIR = "/sdcard/1m3u8temp/";
     private static M3U8Manger mM3U8Manger;
     private String url;//m3u8的路径
     private String saveFilePath = "/sdcard/Movie/" + System.currentTimeMillis() + ".ts";//文件保存路径
-    private static final String KEY_DEFAULT_TEMP_DIR = "/sdcard/1m3u8temp/";
     private String tempDir = KEY_DEFAULT_TEMP_DIR;//m3u8临时文件夹
     private ExecutorService executor;//10个线程池
-    private DownLoadListener downLoadListener;
+    private M3U8Listener downLoadListener;
     private boolean isRunning = false;//任务是否正在运行
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case WHAT_ON_START:
+                    downLoadListener.onStart();
+                    break;
+                case WHAT_ON_ERROR:
+                    downLoadListener.onError((Throwable) msg.obj);
+                    break;
+                case WHAT_ON_GETINFO:
+                    M3U8 m3U8 = (M3U8) msg.obj;
+                    downLoadListener.onM3U8Info(m3U8.getStartTime(), m3U8.getEndTime());
+                    break;
+                case WHAT_ON_COMPLITED:
+                    downLoadListener.onCompleted();
+                    break;
+            }
+        }
+    };
 
     private M3U8Manger() {
     }
@@ -46,16 +72,16 @@ public class M3U8Manger {
      *
      * @param downLoadListener
      */
-    public synchronized void download(DownLoadListener downLoadListener) {
+    public synchronized void download(M3U8Listener downLoadListener) {
         this.downLoadListener = downLoadListener;
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             if (!isRunning) {
                 startDownload();
             } else {
-                downLoadListener.onError(new Throwable("Task isRunning"));
+                handlerError(new Throwable("Task isRunning"));
             }
         } else {//没有找到sdcard
-            downLoadListener.onError(new Throwable("SDcard not found"));
+            handlerError(new Throwable("SDcard not found"));
         }
     }
 
@@ -63,13 +89,19 @@ public class M3U8Manger {
      * 开始下载了
      */
     private synchronized void startDownload() {
-        downLoadListener.onStart();
+        mHandler.sendEmptyMessage(WHAT_ON_START);
         isRunning = true;//开始下载了
         new Thread() {
             @Override
             public void run() {
                 try {
-                    M3U8 m3u8 = MUtils.parseIndex(url);
+                    M3U8 m3u8 = null;
+                    try {
+                        m3u8 = MUtils.parseIndex(url);
+                    } catch (Exception e) {
+                        handlerError(e);
+                        return;
+                    }
                     float f = 0;
                     for (M3U8Ts ts : m3u8.getTsList()) {
                         f += ts.getSeconds();
@@ -91,20 +123,32 @@ public class M3U8Manger {
                     MUtils.merge(m3u8, tempDir);//合并ts
                     //移动到指定的目录
                     MUtils.moveFile(tempDir, saveFilePath);
-                    downLoadListener.onCompleted();//下载完成了
+                    mHandler.sendEmptyMessage(WHAT_ON_START);
                     isRunning = false;//复位
                 } catch (IOException e) {
                     e.printStackTrace();
-                    downLoadListener.onError(e);
+                    handlerError(e);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                    downLoadListener.onError(e);
+                    handlerError(e);
                 } finally {
                     //清空临时目录
                     MUtils.clearDir(new File(tempDir).getParentFile());
                 }
             }
         }.start();
+    }
+
+    /**
+     * 通知异常
+     *
+     * @param e
+     */
+    private void handlerError(Throwable e) {
+        Message msg = mHandler.obtainMessage();
+        msg.obj = e;
+        msg.what = WHAT_ON_ERROR;
+        mHandler.sendMessage(msg);
     }
 
     /**

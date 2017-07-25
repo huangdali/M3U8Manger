@@ -1,11 +1,13 @@
 package com.hdl.m3u8.bean;
 
+import android.support.annotation.NonNull;
+
 /**
  * m3u8切片类
  * Created by HDL on 2017/7/24.
  */
 
-public class M3U8Ts {
+public class M3U8Ts implements Comparable<M3U8Ts> {
     private String file;
     private float seconds;
 
@@ -33,5 +35,17 @@ public class M3U8Ts {
     @Override
     public String toString() {
         return file + " (" + seconds + "sec)";
+    }
+
+    /**
+     * 获取时间
+     */
+    public long getLongDate() {
+        return Long.parseLong(file.substring(0, file.lastIndexOf(".")));
+    }
+
+    @Override
+    public int compareTo(@NonNull M3U8Ts o) {
+        return file.compareTo(o.file);
     }
 }

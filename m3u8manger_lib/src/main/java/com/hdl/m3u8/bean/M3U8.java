@@ -1,6 +1,7 @@
 package com.hdl.m3u8.bean;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -11,6 +12,8 @@ import java.util.List;
 public class M3U8 {
     private String basepath;
     private List<M3U8Ts> tsList = new ArrayList<M3U8Ts>();
+    private long startTime;//开始时间
+    private long endTime;//结束时间
 
     public String getBasepath() {
         return basepath;
@@ -30,6 +33,28 @@ public class M3U8 {
 
     public void addTs(M3U8Ts ts) {
         this.tsList.add(ts);
+    }
+
+    /**
+     * 获取开始时间
+     *
+     * @return
+     */
+    public long getStartTime() {
+        Collections.sort(tsList);
+        startTime = tsList.get(0).getLongDate();
+        return startTime;
+    }
+
+    /**
+     * 获取结束时间(加上了最后一段时间的持续时间)
+     *
+     * @return
+     */
+    public long getEndTime() {
+        M3U8Ts m3U8Ts = tsList.get(tsList.size() - 1);
+        endTime = m3U8Ts.getLongDate() + (long) (m3U8Ts.getSeconds() * 1000);
+        return endTime;
     }
 
     @Override

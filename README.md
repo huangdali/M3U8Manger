@@ -6,26 +6,33 @@
 导入：
 
 ```java
-compile 'com.jwkj:M3U8Manger:v1.0.2'
+compile 'com.jwkj:M3U8Manger:v1.0.3'
 ```
 
 使用：
 
 ```java
- M3U8Manger.getInstance()
+M3U8Manger.getInstance()
                 .setUrl(url)
-                .setSaveFilePath("/sdcard/11/"+System.currentTimeMillis()+".ts")//文件类型目前只支持ts
-                .download(new DownLoadListener() {
+                .setSaveFilePath("/sdcard/11/"+System.currentTimeMillis()+".ts")
+                .download(new M3U8Listener() {
                     @Override
-                    public void onStart() {//开始下载
+                    public void onStart() {
+                        Toast.makeText(MainActivity.this, "开始下载了", Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
-                    public void onError(Throwable errorMsg) {//下载出错
+                    public void onError(Throwable errorMsg) {
+                        Log.e("hdltag", "onError(MainActivity.java:28):下载出错了" + errorMsg);
                     }
 
                     @Override
-                    public void onCompleted() {//下载完成
+                    public void onCompleted() {
+                        Log.e("hdltag", "onCompleted(MainActivity.java:33):下载完成了");
                     }
                 });
 ```
+## 版本记录
+v1.0.3
+- 【修复】url失效时抛出异常
+- 【新增】M3U8开始、结束时间

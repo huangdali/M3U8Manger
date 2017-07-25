@@ -4,9 +4,10 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.hdl.m3u8.M3U8Manger;
-import com.hdl.m3u8.bean.DownLoadListener;
+import com.hdl.m3u8.bean.M3U8Listener;
 import com.hdl.m3u8demo.runtimepermissions.PermissionsManager;
 import com.hdl.m3u8demo.runtimepermissions.PermissionsResultAction;
 
@@ -37,20 +38,23 @@ public class MainActivity extends AppCompatActivity {
         M3U8Manger.getInstance()
                 .setUrl(url)
                 .setSaveFilePath("/sdcard/11/"+System.currentTimeMillis()+".ts")
-                .download(new DownLoadListener() {
+                .download(new M3U8Listener() {
                     @Override
                     public void onStart() {
                         Log.e("hdltag", "onStart(MainActivity.java:23):开始下载了");
+                        Toast.makeText(MainActivity.this, "开始下载了", Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
                     public void onError(Throwable errorMsg) {
-                        Log.e("hdltag", "onError(MainActivity.java:28):" + errorMsg);
+                        Log.e("hdltag", "onError(MainActivity.java:28):下载出错了" + errorMsg);
+                        Toast.makeText(MainActivity.this, "下载出错", Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
                     public void onCompleted() {
                         Log.e("hdltag", "onCompleted(MainActivity.java:33):下载完成了");
+                        Toast.makeText(MainActivity.this, "完成", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
