@@ -3,6 +3,7 @@ package com.hdl.m3u8;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 import com.hdl.m3u8.bean.M3U8;
 import com.hdl.m3u8.bean.M3U8Listener;
@@ -15,7 +16,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -262,28 +262,8 @@ public class M3U8Manger {
         } else if (dir.list().length > 0) {//保存的路径必须必须为空或者文件夹不存在
             MUtils.clearDir(dir);//清空文件
         }
-        List<M3U8Ts> downList = new ArrayList<>();
-        if ((m3u8.getStartDownloadTime() == -1 && m3u8.getEndDownloadTime() == -1) || m3u8.getEndDownloadTime() <= m3u8.getStartDownloadTime()) {
-            downList = m3u8.getTsList();
-        } else if (m3u8.getStartDownloadTime() == -1 && m3u8.getEndDownloadTime() > -1) {
-            for (final M3U8Ts ts : m3u8.getTsList()) { //从头下到指定时间
-                if (ts.getLongDate() <= m3u8.getEndDownloadTime()) {
-                    downList.add(ts);
-                }
-            }
-        } else if (m3u8.getStartDownloadTime() > -1 && m3u8.getEndDownloadTime() == -1) {
-            for (final M3U8Ts ts : m3u8.getTsList()) { //从指定时间下到尾部
-                if (ts.getLongDate() >= m3u8.getStartDownloadTime()) {
-                    downList.add(ts);
-                }
-            }
-        } else {//从指定开始时间下载到指定结束时间
-            for (final M3U8Ts ts : m3u8.getTsList()) {
-                if (m3u8.getStartDownloadTime() <= ts.getLongDate() && ts.getLongDate() <= m3u8.getEndDownloadTime()) {
-                    downList.add(ts);//指定区间的ts
-                }
-            }
-        }
+        List<M3U8Ts> downList = MUtils.getLimitM3U8Ts(m3u8);
+        Log.e("hdltag", "download(M3U8Manger.java:266):" + downList);
         for (final M3U8Ts ts : downList) {
             executor.execute(new Runnable() {
                 @Override

@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
         M3U8Manger.getInstance()
                 .setUrl(url)
                 .setSaveFilePath("/sdcard/11/" + System.currentTimeMillis() + ".ts")
-                .download(1500480000074l,1500480080164l,new M3U8Listener() {
+                .download(1500480050183l,1500480150040l,new M3U8Listener() {
                     @Override
                     public void onStart() {
                         Log.e("hdltag", "onStart(MainActivity.java:23):开始下载了");
@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onM3U8Info(M3U8 m3U8) {
-
+                        Log.e("hdltag", "onM3U8Info(MainActivity.java:93):" +m3U8);
                     }
                 });
     }

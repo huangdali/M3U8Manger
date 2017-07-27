@@ -1,5 +1,7 @@
 package com.hdl.m3u8.utils;
 
+import android.util.Log;
+
 import com.hdl.m3u8.bean.M3U8;
 import com.hdl.m3u8.bean.M3U8Ts;
 
@@ -70,28 +72,7 @@ public class MUtils {
      * @throws IOException
      */
     public static void merge(M3U8 m3u8, String tofile) throws IOException {
-        List<M3U8Ts> mergeList=new ArrayList<>();
-        if ((m3u8.getStartDownloadTime() == -1 && m3u8.getEndDownloadTime() == -1) || m3u8.getEndDownloadTime() <= m3u8.getStartDownloadTime()) {
-            mergeList = m3u8.getTsList();
-        } else if (m3u8.getStartDownloadTime() == -1 && m3u8.getEndDownloadTime() > -1) {
-            for (final M3U8Ts ts : m3u8.getTsList()) { //从头下到指定时间
-                if (ts.getLongDate() <= m3u8.getEndDownloadTime()) {
-                    mergeList.add(ts);
-                }
-            }
-        } else if (m3u8.getStartDownloadTime() > -1 && m3u8.getEndDownloadTime() == -1) {
-            for (final M3U8Ts ts : m3u8.getTsList()) { //从指定时间下到尾部
-                if (ts.getLongDate() >= m3u8.getStartDownloadTime()) {
-                    mergeList.add(ts);
-                }
-            }
-        } else {//从指定开始时间下载到指定结束时间
-            for (final M3U8Ts ts : m3u8.getTsList()) {
-                if (m3u8.getStartDownloadTime() <= ts.getLongDate() && ts.getLongDate() <= m3u8.getEndDownloadTime()) {
-                    mergeList.add(ts);//指定区间的ts
-                }
-            }
-        }
+        List<M3U8Ts> mergeList = getLimitM3U8Ts(m3u8);
         File file = new File(tofile);
         FileOutputStream fos = new FileOutputStream(file);
 
@@ -130,5 +111,45 @@ public class MUtils {
                 dir.delete();// 删除文件夹
             }
         }
+    }
+
+    /**
+     * 获取指定区间的M3U8切片
+     *
+     * @param m3u8
+     * @return
+     */
+    public static List<M3U8Ts> getLimitM3U8Ts(M3U8 m3u8) {
+        List<M3U8Ts> downList = new ArrayList<>();
+
+        if (m3u8.getStartDownloadTime() < m3u8.getStartTime() || m3u8.getEndDownloadTime() > m3u8.getEndTime()) {
+            downList = m3u8.getTsList();
+            return downList;
+        }
+
+
+        if ((m3u8.getStartDownloadTime() == -1 && m3u8.getEndDownloadTime() == -1) || m3u8.getEndDownloadTime() <= m3u8.getStartDownloadTime()) {
+            downList = m3u8.getTsList();
+        } else if (m3u8.getStartDownloadTime() == -1 && m3u8.getEndDownloadTime() > -1) {
+            for (final M3U8Ts ts : m3u8.getTsList()) { //从头下到指定时间
+                if (ts.getLongDate() <= m3u8.getEndDownloadTime()) {
+                    downList.add(ts);
+                }
+            }
+        } else if (m3u8.getStartDownloadTime() > -1 && m3u8.getEndDownloadTime() == -1) {
+            for (final M3U8Ts ts : m3u8.getTsList()) { //从指定时间下到尾部
+                if (ts.getLongDate() >= m3u8.getStartDownloadTime()) {
+                    downList.add(ts);
+                }
+            }
+        } else {//从指定开始时间下载到指定结束时间
+            for (final M3U8Ts ts : m3u8.getTsList()) {
+                if (m3u8.getStartDownloadTime() <= ts.getLongDate() && ts.getLongDate() <= m3u8.getEndDownloadTime()) {
+                    downList.add(ts);//指定区间的ts
+                }
+            }
+        }
+        Log.e("hdltag", "getLimitM3U8Ts(MUtils.java:152):" + downList);
+        return downList;
     }
 }
