@@ -13,6 +13,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * M3u8工具类
@@ -68,9 +70,32 @@ public class MUtils {
      * @throws IOException
      */
     public static void merge(M3U8 m3u8, String tofile) throws IOException {
+        List<M3U8Ts> mergeList=new ArrayList<>();
+        if ((m3u8.getStartDownloadTime() == -1 && m3u8.getEndDownloadTime() == -1) || m3u8.getEndDownloadTime() <= m3u8.getStartDownloadTime()) {
+            mergeList = m3u8.getTsList();
+        } else if (m3u8.getStartDownloadTime() == -1 && m3u8.getEndDownloadTime() > -1) {
+            for (final M3U8Ts ts : m3u8.getTsList()) { //从头下到指定时间
+                if (ts.getLongDate() <= m3u8.getEndDownloadTime()) {
+                    mergeList.add(ts);
+                }
+            }
+        } else if (m3u8.getStartDownloadTime() > -1 && m3u8.getEndDownloadTime() == -1) {
+            for (final M3U8Ts ts : m3u8.getTsList()) { //从指定时间下到尾部
+                if (ts.getLongDate() >= m3u8.getStartDownloadTime()) {
+                    mergeList.add(ts);
+                }
+            }
+        } else {//从指定开始时间下载到指定结束时间
+            for (final M3U8Ts ts : m3u8.getTsList()) {
+                if (m3u8.getStartDownloadTime() <= ts.getLongDate() && ts.getLongDate() <= m3u8.getEndDownloadTime()) {
+                    mergeList.add(ts);//指定区间的ts
+                }
+            }
+        }
         File file = new File(tofile);
         FileOutputStream fos = new FileOutputStream(file);
-        for (M3U8Ts ts : m3u8.getTsList()) {
+
+        for (M3U8Ts ts : mergeList) {
             IOUtils.copyLarge(new FileInputStream(new File(file.getParentFile(), ts.getFile())), fos);
         }
         fos.close();

@@ -15,6 +15,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -78,7 +80,25 @@ public class M3U8Manger {
         this.downLoadListener = downLoadListener;
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             if (!isRunning) {
-                startDownload();
+                startDownload(-1, -1);
+            } else {
+                handlerError(new Throwable("Task isRunning"));
+            }
+        } else {//没有找到sdcard
+            handlerError(new Throwable("SDcard not found"));
+        }
+    }
+
+    /**
+     * 下载指定时间的ts
+     *
+     * @param downLoadListener
+     */
+    public synchronized void download(long startDwonloadTime, long endDownloadTime, M3U8Listener downLoadListener) {
+        this.downLoadListener = downLoadListener;
+        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+            if (!isRunning) {
+                startDownload(startDwonloadTime, endDownloadTime);
             } else {
                 handlerError(new Throwable("Task isRunning"));
             }
@@ -91,7 +111,7 @@ public class M3U8Manger {
      * 停止任务
      */
     public synchronized void stop() {
-        isRunning=false;
+        isRunning = false;
         if (executor != null && executor.isTerminated()) {
             executor.shutdownNow();
             executor = null;
@@ -131,7 +151,7 @@ public class M3U8Manger {
     /**
      * 开始下载了
      */
-    private synchronized void startDownload() {
+    private synchronized void startDownload(final long startDwonloadTime, final long endDownloadTime) {
         mHandler.sendEmptyMessage(WHAT_ON_START);
         isRunning = true;//开始下载了
         new Thread() {
@@ -141,16 +161,13 @@ public class M3U8Manger {
                     M3U8 m3u8 = null;
                     try {
                         m3u8 = MUtils.parseIndex(url);
+                        m3u8.setStartDownloadTime(startDwonloadTime);
+                        m3u8.setEndDownloadTime(endDownloadTime);
                         sendM3u8Info(m3u8);
                     } catch (Exception e) {
                         handlerError(e);
                         return;
                     }
-//                    float f = 0;
-//                    for (M3U8Ts ts : m3u8.getTsList()) {
-//                        f += ts.getSeconds();
-//                    }
-//                    System.out.println("movie length: " + ((int) f / 60) + "min " + (int) f % 60 + " sec");
                     if (executor != null && executor.isTerminated()) {
                         executor.shutdownNow();
                         executor = null;
@@ -167,7 +184,7 @@ public class M3U8Manger {
                     MUtils.merge(m3u8, tempDir);//合并ts
                     //移动到指定的目录
                     MUtils.moveFile(tempDir, saveFilePath);
-                    mHandler.sendEmptyMessage(WHAT_ON_START);
+                    mHandler.sendEmptyMessage(WHAT_ON_COMPLITED);
                     isRunning = false;//复位
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -245,10 +262,30 @@ public class M3U8Manger {
         } else if (dir.list().length > 0) {//保存的路径必须必须为空或者文件夹不存在
             MUtils.clearDir(dir);//清空文件
         }
-
-        for (final M3U8Ts ts : m3u8.getTsList()) {
+        List<M3U8Ts> downList = new ArrayList<>();
+        if ((m3u8.getStartDownloadTime() == -1 && m3u8.getEndDownloadTime() == -1) || m3u8.getEndDownloadTime() <= m3u8.getStartDownloadTime()) {
+            downList = m3u8.getTsList();
+        } else if (m3u8.getStartDownloadTime() == -1 && m3u8.getEndDownloadTime() > -1) {
+            for (final M3U8Ts ts : m3u8.getTsList()) { //从头下到指定时间
+                if (ts.getLongDate() <= m3u8.getEndDownloadTime()) {
+                    downList.add(ts);
+                }
+            }
+        } else if (m3u8.getStartDownloadTime() > -1 && m3u8.getEndDownloadTime() == -1) {
+            for (final M3U8Ts ts : m3u8.getTsList()) { //从指定时间下到尾部
+                if (ts.getLongDate() >= m3u8.getStartDownloadTime()) {
+                    downList.add(ts);
+                }
+            }
+        } else {//从指定开始时间下载到指定结束时间
+            for (final M3U8Ts ts : m3u8.getTsList()) {
+                if (m3u8.getStartDownloadTime() <= ts.getLongDate() && ts.getLongDate() <= m3u8.getEndDownloadTime()) {
+                    downList.add(ts);//指定区间的ts
+                }
+            }
+        }
+        for (final M3U8Ts ts : downList) {
             executor.execute(new Runnable() {
-
                 @Override
                 public void run() {
                     try {
@@ -263,8 +300,8 @@ public class M3U8Manger {
                     }
                 }
             });
-
         }
 
     }
+
 }

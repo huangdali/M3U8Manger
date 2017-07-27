@@ -14,6 +14,8 @@ public class M3U8 {
     private List<M3U8Ts> tsList = new ArrayList<M3U8Ts>();
     private long startTime;//开始时间
     private long endTime;//结束时间
+    private long startDownloadTime;//开始下载时间
+    private long endDownloadTime;//结束下载时间
 
     public String getBasepath() {
         return basepath;
@@ -33,6 +35,22 @@ public class M3U8 {
 
     public void addTs(M3U8Ts ts) {
         this.tsList.add(ts);
+    }
+
+    public long getStartDownloadTime() {
+        return startDownloadTime;
+    }
+
+    public void setStartDownloadTime(long startDownloadTime) {
+        this.startDownloadTime = startDownloadTime;
+    }
+
+    public long getEndDownloadTime() {
+        return endDownloadTime;
+    }
+
+    public void setEndDownloadTime(long endDownloadTime) {
+        this.endDownloadTime = endDownloadTime;
     }
 
     /**
@@ -64,8 +82,10 @@ public class M3U8 {
         for (M3U8Ts ts : tsList) {
             sb.append("\nts: " + ts);
         }
-        sb.append("\n\nstartTime = "+startTime);
-        sb.append("\n\nendTime = "+endTime);
+        sb.append("\n\nstartTime = " + startTime);
+        sb.append("\n\nendTime = " + endTime);
+        sb.append("\n\nstartDownloadTime = " + startDownloadTime);
+        sb.append("\n\nendDownloadTime = " + endDownloadTime);
         return sb.toString();
     }
 }

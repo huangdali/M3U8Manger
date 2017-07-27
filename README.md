@@ -8,7 +8,7 @@
 ### 导入：
 
 ```java
-compile 'com.jwkj:M3U8Manger:v1.0.4'
+compile 'com.jwkj:M3U8Manger:v1.0.5'
 ```
 
 ### 获取M3U8信息：
@@ -72,6 +72,11 @@ M3U8Manger.getInstance()
 ```
 
 ## 版本记录
+
+v1.0.5
+- 【修复】下载成功走的是onStart
+- 【新增】指定下载的区间
+
 v1.0.4
 - 【新增】获取M3U8基本信息方法
 - 【新增】停止任务方法

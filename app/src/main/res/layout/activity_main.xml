@@ -10,7 +10,13 @@
         android:onClick="onDownload"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
+        android:text="全部下载"
+         />
+    <Button
+        android:onClick="onDownload1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="片段下载"
          />
     <Button
         android:onClick="onStop"
