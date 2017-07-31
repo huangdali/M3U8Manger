@@ -26,7 +26,7 @@
 ### 导入：
 
 ```java
-compile 'com.jwkj:M3U8Manger:v1.0.6'
+compile 'com.jwkj:M3U8Manger:v1.0.7'
 ```
 
 ### 获取M3U8信息：
@@ -90,6 +90,9 @@ M3U8Manger.getInstance()
 ```
 
 ## 版本记录
+
+v1.0.7([2017.07.31]())
+- 【修复】获取M3U8不走onStart的bug
 
 v1.0.6
 - 【修复】指定下载的区间时间不准问题

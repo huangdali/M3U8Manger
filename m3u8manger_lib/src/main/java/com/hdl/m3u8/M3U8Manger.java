@@ -24,10 +24,12 @@ import java.util.concurrent.Executors;
  * M3u8管理器
  */
 public class M3U8Manger {
+    private static int currDownloadTsCount = 0;//当前下载ts切片的个数
     private static final int WHAT_ON_START = 166;
     private static final int WHAT_ON_ERROR = 711;
     private static final int WHAT_ON_GETINFO = 840;
     private static final int WHAT_ON_COMPLITED = 625;
+    private static final int WHAT_ON_PROGRESS = 280;
     private static final String KEY_DEFAULT_TEMP_DIR = "/sdcard/1m3u8temp/";
     private static M3U8Manger mM3U8Manger;
     private String url;//m3u8的路径
@@ -45,6 +47,7 @@ public class M3U8Manger {
                         downLoadListener.onStart();
                         break;
                     case WHAT_ON_ERROR:
+                        currDownloadTsCount = 0;//出错也要复位
                         downLoadListener.onError((Throwable) msg.obj);
                         break;
                     case WHAT_ON_GETINFO:
@@ -52,12 +55,23 @@ public class M3U8Manger {
                         downLoadListener.onM3U8Info(m3U8);
                         break;
                     case WHAT_ON_COMPLITED:
+                        currDownloadTsCount = 0;//完成之后要复位
                         downLoadListener.onCompleted();
+                        break;
+                    case WHAT_ON_PROGRESS:
+                        long size = (long) msg.obj;
+                        long curTime = System.currentTimeMillis();
+                        Log.e("hdltag", "handleMessage(M3U8Manger.java:64):速度：" + size / ((curTime - lastTime) / 1000f));
+
+                        lastTime = curTime;
+                        Log.e("hdltag", "handleMessage(M3U8Manger.java:62):" + msg.arg1 + "-------------------" + msg.arg2);
+                        downLoadListener.onDownloadingProgress(msg.arg1, msg.arg2);
                         break;
                 }
             }
         }
     };
+    private long lastTime=0;
 
     private M3U8Manger() {
     }
@@ -126,6 +140,7 @@ public class M3U8Manger {
      */
     public synchronized void getM3U8(M3U8Listener downLoadListener) {
         this.downLoadListener = downLoadListener;
+        downLoadListener.onStart();//开始了
         if (!isRunning) {
             new Thread() {
                 @Override
@@ -262,7 +277,9 @@ public class M3U8Manger {
         } else if (dir.list().length > 0) {//保存的路径必须必须为空或者文件夹不存在
             MUtils.clearDir(dir);//清空文件
         }
-        List<M3U8Ts> downList = MUtils.getLimitM3U8Ts(m3u8);
+        final List<M3U8Ts> downList = MUtils.getLimitM3U8Ts(m3u8);
+        final int total = downList.size();
+
         Log.e("hdltag", "download(M3U8Manger.java:266):" + downList);
         for (final M3U8Ts ts : downList) {
             executor.execute(new Runnable() {
@@ -272,11 +289,20 @@ public class M3U8Manger {
 //                        System.out.println("download " + (m3u8.getTsList().indexOf(ts) + 1) + "/"
 //                                + m3u8.getTsList().size() + ": " + ts);
                         FileOutputStream writer = new FileOutputStream(new File(dir, ts.getFile()));
-                        IOUtils.copyLarge(new URL(m3u8.getBasepath() + ts.getFile()).openStream(), writer);
+                        long size = IOUtils.copyLarge(new URL(m3u8.getBasepath() + ts.getFile()).openStream(), writer);
+//                        Log.e("hdltag", "run(M3U8Manger.java:283): size=" + size);
                         writer.close();
+                        currDownloadTsCount++;
+                        Message msg = mHandler.obtainMessage();
+                        msg.what = WHAT_ON_PROGRESS;
+                        msg.obj = size;
+                        msg.arg1 = total;
+                        msg.arg2 = currDownloadTsCount;
+                        mHandler.sendMessage(msg);
 //                        System.out.println("download ok for: " + ts);
                     } catch (IOException e) {
                         e.printStackTrace();
+                        handlerError(e);
                     }
                 }
             });

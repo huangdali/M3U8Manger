@@ -92,33 +92,42 @@ public class MainActivity extends AppCompatActivity {
                     public void onM3U8Info(M3U8 m3U8) {
                         Log.e("hdltag", "onM3U8Info(MainActivity.java:93):" +m3U8);
                     }
+                    @Override
+                    public void onDownloadingProgress(int total, int progress) {
+                        Log.e("hdltag", "onDownloadingProgress(MainActivity.java:126):" + total + " ------ " + progress);
+                    }
                 });
     }
 
     public void onGetInfo(View view) {
-        String url = "http://gwell-oss-test1.oss-cn-shenzhen.aliyuncs.com/video-123yun/2017-07-17%2017%3A00%3A00.m3u8?Expires=1501036405&OSSAccessKeyId=LTAIAxqhixFoJsvp&Signature=zfkPv4QtRNPETyL31BUzx4U%2FpHU%3D";
+        String url = "http://gwell-oss-test1.oss-cn-shenzhen.aliyuncs.com/video-123yun/2017-07-20%2017%3A00%3A00.m3u8?Expires=1501502790&OSSAccessKeyId=LTAIAxqhixFoJsvp&Signature=MfjA%2FuD7pWmoVXUgO3Uwn0YiOQU%3D";
         M3U8Manger.getInstance()
                 .setUrl(url)
                 .getM3U8(new M3U8Listener() {
                     @Override
                     public void onStart() {
-                        Log.e("hdltag", "onStart(MainActivity.java:75):开始了" );
+                        Log.e("hdltag", "onStart(MainActivity.java:108):开始了" );
                     }
 
                     @Override
                     public void onError(Throwable errorMsg) {
-                        Log.e("hdltag", "onStart(MainActivity.java:75):出错了"+errorMsg );
+                        Log.e("hdltag", "onStart(MainActivity.java:113):出错了"+errorMsg );
                     }
 
                     @Override
                     public void onCompleted() {
-                        Log.e("hdltag", "onStart(MainActivity.java:75):完成了" );
+                        Log.e("hdltag", "onStart(MainActivity.java:119):完成了" );
                     }
 
                     @Override
                     public void onM3U8Info(M3U8 m3U8) {
-                        Log.e("hdltag", "onStart(MainActivity.java:75):拿到结果了"+m3U8 );
-                        Log.e("hdltag", "onM3U8Info(MainActivity.java:91):" + m3U8.getTsList());
+                        Log.e("hdltag", "onStart(MainActivity.java:124):拿到结果了"+m3U8 );
+                        Log.e("hdltag", "onM3U8Info(MainActivity.java:125):" + m3U8.getTsList());
+                    }
+
+                    @Override
+                    public void onDownloadingProgress(int total, int progress) {
+                        Log.e("hdltag", "onDownloadingProgress(MainActivity.java:130):" + total + " ------ " + progress);
                     }
                 });
     }

@@ -22,7 +22,7 @@
         android:onClick="onStop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="只是获取信息"
+        android:text="停止"
         tools:layout_editor_absoluteY="0dp"
         tools:layout_editor_absoluteX="138dp"
         tools:ignore="MissingConstraints" />
