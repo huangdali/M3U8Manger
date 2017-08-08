@@ -101,6 +101,9 @@ M3U8Manger.getInstance()
 
 ## 版本记录
 
+v1.0.9([2017.08.08]())
+- 【新增】判断当前任务是否正在执行isRunning()
+
 v1.0.8([2017.08.08]())
 - 【新增】onLoadFileSizeForItem方法（获取单个ts文件的平均大小）
     - 可根据这个平均值x总的切片个数（total）=总文件的大小

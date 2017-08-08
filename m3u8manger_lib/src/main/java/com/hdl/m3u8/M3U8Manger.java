@@ -108,6 +108,14 @@ public class M3U8Manger {
     }
 
     /**
+     * 返回时候正在运行中
+     * @return
+     */
+    public synchronized boolean isRunning() {
+        return isRunning;
+    }
+
+    /**
      * 下载指定时间的ts
      *
      * @param downLoadListener
