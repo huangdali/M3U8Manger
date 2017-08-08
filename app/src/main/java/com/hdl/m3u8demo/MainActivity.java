@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onDownload(View view) {
-        String url = "http://gwell-oss-test1.oss-cn-shenzhen.aliyuncs.com/video-123yun/2017-07-20%2000%3A00%3A00.m3u8?Expires=1501208683&OSSAccessKeyId=LTAIAxqhixFoJsvp&Signature=C5FdEq8HHfefwBZhmw%2B8Lu7wnkw%3D";
+        String url = "http://gwell-oss-test1.oss-cn-shenzhen.aliyuncs.com/video-123yun/1500541892-1500542032.m3u8";
         M3U8Manger.getInstance()
                 .setUrl(url)
                 .setSaveFilePath("/sdcard/11/" + System.currentTimeMillis() + ".ts")
@@ -59,17 +59,18 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onM3U8Info(M3U8 m3U8) {
-
+                    public void onLoadFileSizeForItem(long fileSize) {
+                        Log.e("hdltag", "onLoadFileSizeForItem(MainActivity.java:63):fileSize=" + fileSize + " b");
                     }
                 });
     }
+
     public void onDownload1(View view) {
-        String url = "http://gwell-oss-test1.oss-cn-shenzhen.aliyuncs.com/video-123yun/2017-07-20%2000%3A00%3A00.m3u8?Expires=1501208683&OSSAccessKeyId=LTAIAxqhixFoJsvp&Signature=C5FdEq8HHfefwBZhmw%2B8Lu7wnkw%3D";
+        String url = "http://gwell-oss-test1.oss-cn-shenzhen.aliyuncs.com/video-123yun/1500541892-1500542032.m3u8";
         M3U8Manger.getInstance()
                 .setUrl(url)
                 .setSaveFilePath("/sdcard/11/" + System.currentTimeMillis() + ".ts")
-                .download(1500480050183l,1500480150040l,new M3U8Listener() {
+                .download(1500480050183l, 1500480150040l, new M3U8Listener() {
                     @Override
                     public void onStart() {
                         Log.e("hdltag", "onStart(MainActivity.java:23):开始下载了");
@@ -90,8 +91,9 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onM3U8Info(M3U8 m3U8) {
-                        Log.e("hdltag", "onM3U8Info(MainActivity.java:93):" +m3U8);
+                        Log.e("hdltag", "onM3U8Info(MainActivity.java:93):" + m3U8);
                     }
+
                     @Override
                     public void onDownloadingProgress(int total, int progress) {
                         Log.e("hdltag", "onDownloadingProgress(MainActivity.java:126):" + total + " ------ " + progress);
@@ -106,22 +108,22 @@ public class MainActivity extends AppCompatActivity {
                 .getM3U8(new M3U8Listener() {
                     @Override
                     public void onStart() {
-                        Log.e("hdltag", "onStart(MainActivity.java:108):开始了" );
+                        Log.e("hdltag", "onStart(MainActivity.java:108):开始了");
                     }
 
                     @Override
                     public void onError(Throwable errorMsg) {
-                        Log.e("hdltag", "onStart(MainActivity.java:113):出错了"+errorMsg );
+                        Log.e("hdltag", "onStart(MainActivity.java:113):出错了" + errorMsg);
                     }
 
                     @Override
                     public void onCompleted() {
-                        Log.e("hdltag", "onStart(MainActivity.java:119):完成了" );
+                        Log.e("hdltag", "onStart(MainActivity.java:119):完成了");
                     }
 
                     @Override
                     public void onM3U8Info(M3U8 m3U8) {
-                        Log.e("hdltag", "onStart(MainActivity.java:124):拿到结果了"+m3U8 );
+                        Log.e("hdltag", "onStart(MainActivity.java:124):拿到结果了" + m3U8);
                         Log.e("hdltag", "onM3U8Info(MainActivity.java:125):" + m3U8.getTsList());
                     }
 

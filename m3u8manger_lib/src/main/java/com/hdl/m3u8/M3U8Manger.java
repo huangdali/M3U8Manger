@@ -30,6 +30,7 @@ public class M3U8Manger {
     private static final int WHAT_ON_GETINFO = 840;
     private static final int WHAT_ON_COMPLITED = 625;
     private static final int WHAT_ON_PROGRESS = 280;
+    private static final int WHAT_ON_FILESIZE_ITEM = 281;
     private static final String KEY_DEFAULT_TEMP_DIR = "/sdcard/1m3u8temp/";
     private static M3U8Manger mM3U8Manger;
     private String url;//m3u8的路径
@@ -58,6 +59,9 @@ public class M3U8Manger {
                         currDownloadTsCount = 0;//完成之后要复位
                         downLoadListener.onCompleted();
                         break;
+                    case WHAT_ON_FILESIZE_ITEM:
+                        downLoadListener.onLoadFileSizeForItem((Long) msg.obj);
+                        break;
                     case WHAT_ON_PROGRESS:
                         long size = (long) msg.obj;
                         long curTime = System.currentTimeMillis();
@@ -71,7 +75,7 @@ public class M3U8Manger {
             }
         }
     };
-    private long lastTime=0;
+    private long lastTime = 0;
 
     private M3U8Manger() {
     }
@@ -293,6 +297,13 @@ public class M3U8Manger {
 //                        Log.e("hdltag", "run(M3U8Manger.java:283): size=" + size);
                         writer.close();
                         currDownloadTsCount++;
+                        if (currDownloadTsCount == 2) {//由于每个ts文件的大小基本是固定的（头尾有点差距），可以通过单个文件的大小来算整个文件的大小
+                            long length = new File(dir, ts.getFile()).length();
+                            Message msg = mHandler.obtainMessage();
+                            msg.what = WHAT_ON_FILESIZE_ITEM;
+                            msg.obj = length;
+                            mHandler.sendMessage(msg);
+                        }
                         Message msg = mHandler.obtainMessage();
                         msg.what = WHAT_ON_PROGRESS;
                         msg.obj = size;

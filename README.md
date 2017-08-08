@@ -80,6 +80,16 @@ M3U8Manger.getInstance()
                     public void onCompleted() {
                         Log.e("hdltag", "onCompleted(MainActivity.java:33):下载完成了");
                     }
+
+                    @Override
+                    public void onLoadFileSizeForItem(long fileSize) {//fileSize的单位是b
+                       Log.e("hdltag", "onLoadFileSizeForItem(MainActivity.java:63):fileSize=" + fileSize + " b");
+                    }
+
+                    @Override
+                    public void onDownloadingProgress(int total, int progress) {//total表示总的ts数，progress当前已经下载完成的ts数
+                           Log.e("hdltag", "onDownloadingProgress(MainActivity.java:126):" + total + " ------ " + progress);
+                    }
                 });
 ```
 
@@ -91,8 +101,12 @@ M3U8Manger.getInstance()
 
 ## 版本记录
 
+v1.0.8([2017.08.08]())
+- 【新增】onLoadFileSizeForItem方法（获取单个ts文件的平均大小）
+    - 可根据这个平均值x总的切片个数（total）=总文件的大小
+
 v1.0.7([2017.07.31]())
-- 【修复】获取M3U8不走onStart的bug
+- 【修复】获取M3U8信息不走onStart的bug
 
 v1.0.6
 - 【修复】指定下载的区间时间不准问题

@@ -11,4 +11,13 @@ public abstract class M3U8Listener implements DownLoadListener {
 
     public void onDownloadingProgress(int total, int progress) {
     }
+
+    /**
+     * 当获取到单个文件大小的时候回调
+     *
+     * @param fileSize 单个文件大小
+     */
+    public void onLoadFileSizeForItem(long fileSize) {
+    }
+
 }
