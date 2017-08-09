@@ -26,7 +26,7 @@
 ### 导入：
 
 ```java
-compile 'com.jwkj:M3U8Manger:v1.0.7'
+compile 'com.jwkj:M3U8Manger:v1.1.0'
 ```
 
 ### 获取M3U8信息：
