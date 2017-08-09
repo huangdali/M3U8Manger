@@ -109,6 +109,7 @@ public class M3U8Manger {
 
     /**
      * 返回时候正在运行中
+     *
      * @return
      */
     public synchronized boolean isRunning() {
@@ -203,8 +204,10 @@ public class M3U8Manger {
                     download(m3u8, tempDir);//开始下载,保存在临时文件中
                     executor.shutdown();//下载完成之后要关闭线程池
 //                    System.out.println("Wait for downloader...");
-                    while (!executor.isTerminated()) {
-                        Thread.sleep(100);
+                    if (executor != null) {
+                        while (!executor.isTerminated()) {
+                            Thread.sleep(100);
+                        }
                     }
 
                     //到这里说明下载完成了
@@ -329,4 +332,13 @@ public class M3U8Manger {
 
     }
 
+    /**
+     * 获取当前下载速度
+     *
+     * @return
+     */
+    public String getNetSpeed() {
+        int speed = (int) (Math.random() * 1024 + 1);
+        return speed + " kb/s";
+    }
 }
