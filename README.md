@@ -103,6 +103,7 @@ M3U8Manger.getInstance()
 
 v1.1.0([2017.08.09]())
 - 【新增】获取下载网速方法getNetSpeed
+- 【修复】特殊情况下M3U8Manger抛出executor为空的问题
 
 v1.0.9([2017.08.08]())
 - 【新增】判断当前任务是否正在执行isRunning()
