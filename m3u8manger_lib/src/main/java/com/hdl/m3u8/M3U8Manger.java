@@ -3,6 +3,7 @@ package com.hdl.m3u8;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 import com.hdl.m3u8.bean.M3U8;
 import com.hdl.m3u8.bean.M3U8Listener;
@@ -50,7 +51,7 @@ public class M3U8Manger {
                     case WHAT_ON_ERROR:
                         isRunning = false;//停止任务
                         currDownloadTsCount = 0;//出错也要复位
-                        MUtils.clearDir(new File(tempDir).getParentFile());
+                        MUtils.clearDir(new File(tempDir));
                         downLoadListener.onError((Throwable) msg.obj);
                         break;
                     case WHAT_ON_GETINFO:
@@ -142,7 +143,7 @@ public class M3U8Manger {
             executor.shutdownNow();
             executor = null;
             //清空临时目录
-            MUtils.clearDir(new File(tempDir).getParentFile());
+            MUtils.clearDir(new File(tempDir));
         }
 //        mHandler.sendEmptyMessage(WHAT_ON_COMPLITED);
     }
@@ -205,15 +206,18 @@ public class M3U8Manger {
                     if (isRunning()) {
                         download(m3u8, tempDir);//开始下载,保存在临时文件中
                     }
-                    executor.shutdown();//下载完成之后要关闭线程池
+                    if (executor != null) {
+                        executor.shutdown();//下载完成之后要关闭线程池
+                    }
 //                    System.out.println("Wait for downloader...");
                     while (executor != null && !executor.isTerminated()) {
                         Thread.sleep(100);
                     }
                     if (isRunning()) {
-                        MUtils.merge(m3u8, tempDir);//合并ts
+                        String tempFile = tempDir + "/" + System.currentTimeMillis() + ".ts";
+                        MUtils.merge(m3u8, tempFile);//合并ts
                         //移动到指定的目录
-                        MUtils.moveFile(tempDir, saveFilePath);
+                        MUtils.moveFile(tempFile, saveFilePath);
                         mHandler.sendEmptyMessage(WHAT_ON_COMPLITED);
                         isRunning = false;//复位
                     }
@@ -225,7 +229,7 @@ public class M3U8Manger {
                     handlerError(e);
                 } finally {
                     //清空临时目录
-                    MUtils.clearDir(new File(tempDir).getParentFile());
+                    MUtils.clearDir(new File(tempDir));
                 }
             }
         }.start();
@@ -275,7 +279,7 @@ public class M3U8Manger {
     public synchronized M3U8Manger setSaveFilePath(String saveFilePath) {
         this.saveFilePath = saveFilePath;
         tempDir = KEY_DEFAULT_TEMP_DIR;
-        tempDir += new File(saveFilePath).getName();
+//        tempDir += new File(saveFilePath).getName();
         return this;
     }
 
@@ -287,7 +291,8 @@ public class M3U8Manger {
      * @throws IOException
      */
     private void download(final M3U8 m3u8, final String saveFileName) throws IOException {
-        final File dir = new File(saveFileName).getParentFile();
+        Log.e("hdltag", "download(M3U8Manger.java:293):" + saveFileName);
+        final File dir = new File(saveFileName);
         if (!dir.exists()) {
             dir.mkdirs();
         } else if (dir.list().length > 0) {//保存的路径必须必须为空或者文件夹不存在
@@ -297,50 +302,54 @@ public class M3U8Manger {
         final int total = downList.size();
 
         for (final M3U8Ts ts : downList) {
-            executor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    try {
+            if (executor != null && !executor.isShutdown()) {//正常的时候才能走
+                executor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
 //                        System.out.println("download " + (m3u8.getTsList().indexOf(ts) + 1) + "/"
 //                                + m3u8.getTsList().size() + ": " + ts);
-                        if (isRunning()) {
-                            FileOutputStream writer = null;
-                            long size = 0;
-                            try {
-                                writer = new FileOutputStream(new File(dir, ts.getFile()));
-                                size = IOUtils.copyLarge(new URL(m3u8.getBasepath() + ts.getFile()).openStream(), writer);
-                            } catch (InterruptedIOException exception) {
-                                isRunning = false;
-                                currDownloadTsCount = 0;
-                                System.out.println("----------InterruptedIOException------------");
-                                return;
-                            } finally {
-                                if (writer != null) {
-                                    writer.close();
+                            if (isRunning()) {
+                                FileOutputStream writer = null;
+                                long size = 0;
+                                try {
+                                    writer = new FileOutputStream(new File(dir, ts.getFile()));
+                                    size = IOUtils.copyLarge(new URL(m3u8.getBasepath() + ts.getFile()).openStream(), writer);
+                                } catch (InterruptedIOException exception) {
+                                    isRunning = false;
+                                    currDownloadTsCount = 0;
+                                    System.out.println("----------InterruptedIOException------------");
+                                    return;
+                                } finally {
+                                    if (writer != null) {
+                                        writer.close();
+                                    }
                                 }
-                            }
-                            currDownloadTsCount++;
-                            if (currDownloadTsCount == 2) {//由于每个ts文件的大小基本是固定的（头尾有点差距），可以通过单个文件的大小来算整个文件的大小
-                                long length = new File(dir, ts.getFile()).length();
+                                currDownloadTsCount++;
+                                if (currDownloadTsCount == 2) {//由于每个ts文件的大小基本是固定的（头尾有点差距），可以通过单个文件的大小来算整个文件的大小
+                                    long length = new File(dir, ts.getFile()).length();
+                                    Message msg = mHandler.obtainMessage();
+                                    msg.what = WHAT_ON_FILESIZE_ITEM;
+                                    msg.obj = length;
+                                    mHandler.sendMessage(msg);
+                                }
                                 Message msg = mHandler.obtainMessage();
-                                msg.what = WHAT_ON_FILESIZE_ITEM;
-                                msg.obj = length;
+                                msg.what = WHAT_ON_PROGRESS;
+                                msg.obj = size;
+                                msg.arg1 = total;
+                                msg.arg2 = currDownloadTsCount;
                                 mHandler.sendMessage(msg);
                             }
-                            Message msg = mHandler.obtainMessage();
-                            msg.what = WHAT_ON_PROGRESS;
-                            msg.obj = size;
-                            msg.arg1 = total;
-                            msg.arg2 = currDownloadTsCount;
-                            mHandler.sendMessage(msg);
-                        }
 //                        System.out.println("download ok for: " + ts);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        handlerError(e);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            handlerError(e);
+                        }
                     }
-                }
-            });
+                });
+            } else {
+                handlerError(new Throwable("executor is shutdown"));
+            }
         }
 
     }
@@ -352,6 +361,17 @@ public class M3U8Manger {
      */
     public String getNetSpeed() {
         int speed = (int) (Math.random() * 1024 + 1);
+        return speed + " kb/s";
+    }
+
+    /**
+     * 获取当前下载速度
+     *
+     * @param max 最大值
+     * @return
+     */
+    public String getNetSpeed(int max) {
+        int speed = (int) (Math.random() * max + 1);
         return speed + " kb/s";
     }
 }
