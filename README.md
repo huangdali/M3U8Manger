@@ -26,7 +26,7 @@
 ### 导入：
 
 ```java
-compile 'com.jwkj:M3U8Manger:v1.1.0'
+compile 'com.jwkj:M3U8Manger:v1.1.1'
 ```
 
 ### 获取M3U8信息：
@@ -100,6 +100,10 @@ M3U8Manger.getInstance()
 ```
 
 ## 版本记录
+
+v1.1.1([2017.08.09]())
+- 【修复】stop时未能完全停止任务
+- 【优化】下载出错时不应走onCompleted方法
 
 v1.1.0([2017.08.09]())
 - 【新增】获取下载网速方法getNetSpeed

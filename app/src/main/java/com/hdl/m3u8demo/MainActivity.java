@@ -35,26 +35,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onDownload(View view) {
-        String url = "http://gwell-oss-test1.oss-cn-shenzhen.aliyuncs.com/video-123yun/1500541892-1500542032.m3u8";
+        String url = "http://gwell-oss-test1.oss-cn-shenzhen.aliyuncs.com/video-123yun/1500541966-1500542510.m3u8?Expires=1502348254&OSSAccessKeyId=LTAIAxqhixFoJsvp&Signature=w1gZoVy2j066nwOC%2B49JzNhwErc%3D";
         M3U8Manger.getInstance()
                 .setUrl(url)
                 .setSaveFilePath("/sdcard/11/" + System.currentTimeMillis() + ".ts")
                 .download(new M3U8Listener() {
                     @Override
                     public void onStart() {
-                        Log.e("hdltag", "onStart(MainActivity.java:23):开始下载了");
+                        Log.e("hdltag", "onStart(MainActivity.java:44):开始下载了");
                         Toast.makeText(MainActivity.this, "开始下载了", Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
                     public void onError(Throwable errorMsg) {
-                        Log.e("hdltag", "onError(MainActivity.java:28):下载出错了" + errorMsg);
+                        Log.e("hdltag", "onError(MainActivity.java:51):下载出错了" + errorMsg);
                         Toast.makeText(MainActivity.this, "下载出错", Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
                     public void onCompleted() {
-                        Log.e("hdltag", "onCompleted(MainActivity.java:33):下载完成了");
+                        Log.e("hdltag", "onCompleted(MainActivity.java:57):下载完成了");
                         Toast.makeText(MainActivity.this, "完成", Toast.LENGTH_SHORT).show();
                     }
 

@@ -3,7 +3,6 @@ package com.hdl.m3u8;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 
 import com.hdl.m3u8.bean.M3U8;
 import com.hdl.m3u8.bean.M3U8Listener;
@@ -15,6 +14,7 @@ import org.apache.commons.io.IOUtils;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.net.URL;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -48,7 +48,9 @@ public class M3U8Manger {
                         downLoadListener.onStart();
                         break;
                     case WHAT_ON_ERROR:
+                        isRunning = false;//停止任务
                         currDownloadTsCount = 0;//出错也要复位
+                        MUtils.clearDir(new File(tempDir).getParentFile());
                         downLoadListener.onError((Throwable) msg.obj);
                         break;
                     case WHAT_ON_GETINFO:
@@ -63,12 +65,9 @@ public class M3U8Manger {
                         downLoadListener.onLoadFileSizeForItem((Long) msg.obj);
                         break;
                     case WHAT_ON_PROGRESS:
-                        long size = (long) msg.obj;
+//                        long size = (long) msg.obj;
                         long curTime = System.currentTimeMillis();
-                        Log.e("hdltag", "handleMessage(M3U8Manger.java:64):速度：" + size / ((curTime - lastTime) / 1000f));
-
                         lastTime = curTime;
-                        Log.e("hdltag", "handleMessage(M3U8Manger.java:62):" + msg.arg1 + "-------------------" + msg.arg2);
                         downLoadListener.onDownloadingProgress(msg.arg1, msg.arg2);
                         break;
                 }
@@ -139,11 +138,13 @@ public class M3U8Manger {
      */
     public synchronized void stop() {
         isRunning = false;
-        if (executor != null && executor.isTerminated()) {
+        if (executor != null) {
             executor.shutdownNow();
             executor = null;
+            //清空临时目录
+            MUtils.clearDir(new File(tempDir).getParentFile());
         }
-        mHandler.sendEmptyMessage(WHAT_ON_COMPLITED);
+//        mHandler.sendEmptyMessage(WHAT_ON_COMPLITED);
     }
 
     /**
@@ -201,19 +202,21 @@ public class M3U8Manger {
                         executor = null;
                     }
                     executor = Executors.newFixedThreadPool(10);
-                    download(m3u8, tempDir);//开始下载,保存在临时文件中
+                    if (isRunning()) {
+                        download(m3u8, tempDir);//开始下载,保存在临时文件中
+                    }
                     executor.shutdown();//下载完成之后要关闭线程池
 //                    System.out.println("Wait for downloader...");
                     while (executor != null && !executor.isTerminated()) {
                         Thread.sleep(100);
                     }
-
-                    //到这里说明下载完成了
-                    MUtils.merge(m3u8, tempDir);//合并ts
-                    //移动到指定的目录
-                    MUtils.moveFile(tempDir, saveFilePath);
-                    mHandler.sendEmptyMessage(WHAT_ON_COMPLITED);
-                    isRunning = false;//复位
+                    if (isRunning()) {
+                        MUtils.merge(m3u8, tempDir);//合并ts
+                        //移动到指定的目录
+                        MUtils.moveFile(tempDir, saveFilePath);
+                        mHandler.sendEmptyMessage(WHAT_ON_COMPLITED);
+                        isRunning = false;//复位
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                     handlerError(e);
@@ -293,7 +296,6 @@ public class M3U8Manger {
         final List<M3U8Ts> downList = MUtils.getLimitM3U8Ts(m3u8);
         final int total = downList.size();
 
-        Log.e("hdltag", "download(M3U8Manger.java:266):" + downList);
         for (final M3U8Ts ts : downList) {
             executor.execute(new Runnable() {
                 @Override
@@ -301,24 +303,37 @@ public class M3U8Manger {
                     try {
 //                        System.out.println("download " + (m3u8.getTsList().indexOf(ts) + 1) + "/"
 //                                + m3u8.getTsList().size() + ": " + ts);
-                        FileOutputStream writer = new FileOutputStream(new File(dir, ts.getFile()));
-                        long size = IOUtils.copyLarge(new URL(m3u8.getBasepath() + ts.getFile()).openStream(), writer);
-//                        Log.e("hdltag", "run(M3U8Manger.java:283): size=" + size);
-                        writer.close();
-                        currDownloadTsCount++;
-                        if (currDownloadTsCount == 2) {//由于每个ts文件的大小基本是固定的（头尾有点差距），可以通过单个文件的大小来算整个文件的大小
-                            long length = new File(dir, ts.getFile()).length();
+                        if (isRunning()) {
+                            FileOutputStream writer = null;
+                            long size = 0;
+                            try {
+                                writer = new FileOutputStream(new File(dir, ts.getFile()));
+                                size = IOUtils.copyLarge(new URL(m3u8.getBasepath() + ts.getFile()).openStream(), writer);
+                            } catch (InterruptedIOException exception) {
+                                isRunning = false;
+                                currDownloadTsCount = 0;
+                                System.out.println("----------InterruptedIOException------------");
+                                return;
+                            } finally {
+                                if (writer != null) {
+                                    writer.close();
+                                }
+                            }
+                            currDownloadTsCount++;
+                            if (currDownloadTsCount == 2) {//由于每个ts文件的大小基本是固定的（头尾有点差距），可以通过单个文件的大小来算整个文件的大小
+                                long length = new File(dir, ts.getFile()).length();
+                                Message msg = mHandler.obtainMessage();
+                                msg.what = WHAT_ON_FILESIZE_ITEM;
+                                msg.obj = length;
+                                mHandler.sendMessage(msg);
+                            }
                             Message msg = mHandler.obtainMessage();
-                            msg.what = WHAT_ON_FILESIZE_ITEM;
-                            msg.obj = length;
+                            msg.what = WHAT_ON_PROGRESS;
+                            msg.obj = size;
+                            msg.arg1 = total;
+                            msg.arg2 = currDownloadTsCount;
                             mHandler.sendMessage(msg);
                         }
-                        Message msg = mHandler.obtainMessage();
-                        msg.what = WHAT_ON_PROGRESS;
-                        msg.obj = size;
-                        msg.arg1 = total;
-                        msg.arg2 = currDownloadTsCount;
-                        mHandler.sendMessage(msg);
 //                        System.out.println("download ok for: " + ts);
                     } catch (IOException e) {
                         e.printStackTrace();
