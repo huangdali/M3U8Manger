@@ -102,8 +102,11 @@ M3U8Manger.getInstance()
 ## 版本记录
 
 v1.1.2([2017.08.09]())
+- 【修复】stop时未能完全停止任务
+- 【修复】特殊情况下M3U8Manger抛出executor为空的问题
+- 【优化】下载出错时不应走onCompleted方法
+- 【新增】获取下载网速方法getNetSpeed
 - 【新增】判断当前任务是否正在执行isRunning()
-- 【bug】有严重bug，千万不要使用
 
 v1.0.8([2017.08.08]())
 - 【新增】onLoadFileSizeForItem方法（获取单个ts文件的平均大小）
