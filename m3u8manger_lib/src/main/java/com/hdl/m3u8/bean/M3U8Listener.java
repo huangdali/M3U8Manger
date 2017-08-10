@@ -1,6 +1,7 @@
 package com.hdl.m3u8.bean;
 
 /**
+ * @deprecated v2版本过时了，请用
  * 监听器
  * Created by HDL on 2017/7/25.
  */

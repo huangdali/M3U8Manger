@@ -22,6 +22,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
+ * @deprecated v2过时了，获取M3U8信息{@link M3U8InfoManger}和下载{@link M3U8DownloadManger}隔离出来
  * M3u8管理器
  */
 public class M3U8Manger {

@@ -83,6 +83,26 @@ public class MUtils {
     }
 
     /**
+     * 将M3U8对象的所有ts切片合并为1个
+     *
+     * @param m3u8
+     * @param tofile
+     * @throws IOException
+     */
+    public static void merge(M3U8 m3u8, String tofile, String basePath) throws IOException {
+        List<M3U8Ts> mergeList = getLimitM3U8Ts(m3u8);
+        File saveFile = new File(tofile);
+        FileOutputStream fos = new FileOutputStream(saveFile);
+        File file;
+        for (M3U8Ts ts : mergeList) {
+            file = new File(basePath, ts.getFile());
+            if (file.isFile() && file.exists()) {
+                IOUtils.copyLarge(new FileInputStream(file), fos);
+            }
+        }
+        fos.close();
+    }
+    /**
      * 移动文件
      *
      * @param sFile
@@ -90,7 +110,7 @@ public class MUtils {
      */
     public static void moveFile(String sFile, String tFile) {
         try {
-            FileUtils.copyFile(new File(sFile), new File(tFile));
+            FileUtils.moveFile(new File(sFile), new File(tFile));
         } catch (IOException e) {
             e.printStackTrace();
         }
