@@ -142,11 +142,11 @@ public class M3U8DownloadTask {
                                 Thread.sleep(100);
                             }
                             if (isRunning) {
-                                String saveFileName = System.currentTimeMillis() + ".ts";
+                                String saveFileName = saveFilePath.substring(saveFilePath.lastIndexOf("/")+1);
                                 String tempSaveFile = tempDir + File.separator + saveFileName;//生成临时文件
                                 MUtils.merge(m3U8, tempSaveFile, tempDir);//合并ts
                                 //移动到指定的目录
-                                MUtils.moveFile(tempSaveFile, saveFilePath + File.separator + saveFileName);//移动到指定文件夹
+                                MUtils.moveFile(tempSaveFile, saveFilePath);//移动到指定文件夹
                                 MUtils.clearDir(new File(tempDir));//清空一下临时文件
                                 mHandler.sendEmptyMessage(WHAT_ON_SUCCESS);
                                 isRunning = false;
