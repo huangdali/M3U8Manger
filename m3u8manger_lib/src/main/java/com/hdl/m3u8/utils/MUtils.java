@@ -110,7 +110,7 @@ public class MUtils {
      */
     public static void moveFile(String sFile, String tFile) {
         try {
-            FileUtils.moveFile(new File(sFile), new File(tFile));
+            FileUtils.moveFile(new File(sFile), new File(tFile).getParentFile());
         } catch (IOException e) {
             e.printStackTrace();
         }

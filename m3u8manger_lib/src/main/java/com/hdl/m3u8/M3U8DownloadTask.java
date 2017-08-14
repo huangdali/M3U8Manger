@@ -268,6 +268,14 @@ public class M3U8DownloadTask {
         }
     }
 
+    public String getSaveFilePath() {
+        return saveFilePath;
+    }
+
+    public void setSaveFilePath(String saveFilePath) {
+        this.saveFilePath = saveFilePath;
+    }
+
     /**
      * 通知异常
      *
