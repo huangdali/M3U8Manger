@@ -13,9 +13,50 @@
         android:onClick="onGetInfo"
         android:text="获取M3U8信息" />
 
-    <Button
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="onDownload"
-        android:text="下载" />
+        android:orientation="horizontal">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onDownload"
+            android:text="下载任务1" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onStopTask1"
+            android:text="停止任务1" />
+
+        <TextView
+            android:id="@+id/tv_speed1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0 kb/s" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onDownloadTask2"
+            android:text="下载任务2" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onStopTask2"
+            android:text="停止任务2" />
+
+        <TextView
+            android:id="@+id/tv_speed2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0 kb/s" />
+    </LinearLayout>
 </LinearLayout>

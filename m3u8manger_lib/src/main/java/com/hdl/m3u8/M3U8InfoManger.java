@@ -17,8 +17,8 @@ import java.io.IOException;
 public class M3U8InfoManger {
     private static M3U8InfoManger mM3U8InfoManger;
     private OnM3U8InfoListener onM3U8InfoListener;
-    private static final int WHAT_ON_ERROR = 438;
-    private static final int WHAT_ON_SUCCESS = 439;
+    private static final int WHAT_ON_ERROR = 1101;
+    private static final int WHAT_ON_SUCCESS = 1102;
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -61,7 +61,7 @@ public class M3U8InfoManger {
                     M3U8 m3u8 = MUtils.parseIndex(url);
                     handlerSuccess(m3u8);
                 } catch (IOException e) {
-                    e.printStackTrace();
+//                    e.printStackTrace();
                     handlerError(e);
                 }
             }

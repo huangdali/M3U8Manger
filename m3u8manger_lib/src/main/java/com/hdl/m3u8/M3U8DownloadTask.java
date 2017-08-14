@@ -3,7 +3,6 @@ package com.hdl.m3u8;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 
 import com.hdl.m3u8.bean.M3U8;
 import com.hdl.m3u8.bean.M3U8Ts;
@@ -15,9 +14,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -26,21 +28,49 @@ import java.util.concurrent.Executors;
  * Created by HDL on 2017/8/10.
  */
 
-public class M3U8DownloadManger {
+public class M3U8DownloadTask {
     private OnDownloadListener onDownloadListener;
-    private static final int WHAT_ON_ERROR = 438;
-    private static final int WHAT_ON_NEXT = 439;
-    private static final int WHAT_ON_SUCCESS = 440;
+    private static final int WHAT_ON_ERROR = 1001;
+    private static final int WHAT_ON_PROGRESS = 1002;
+    private static final int WHAT_ON_SUCCESS = 1003;
+
+    public M3U8DownloadTask(String taskId) {
+        this.taskId = taskId;
+        //需要加上当前时间作为文件夹（由于合并时是根据文件夹来合并的，合并之后需要删除所有的ts文件，这里用到了多线程，所以需要按文件夹来存ts）
+        tempDir += File.separator + System.currentTimeMillis() / (1000 * 60 * 60 * 24) + "-" + taskId;
+    }
+
+    //临时下载目录
     private String tempDir = Environment.getExternalStorageDirectory().getPath() + File.separator + "m3u8temp";
+    //最终文件保存的路径
     private String saveFilePath = Environment.getExternalStorageDirectory().getPath() + File.separator + "11m3u8";
+    //当前下载完成的文件个数
     private int curTs = 0;
+    //总文件的个数
     private int totalTs = 0;
+    //单个文件的大小
     private long itemFileSize = 0;
+    /**
+     * 当前已经在下完成的大小
+     */
+    private long curLenght = 0;
+    /**
+     * 任务是否正在运行中
+     */
     private boolean isRunning = false;
+    /**
+     * 任务id，用于断点续传.
+     * 如果任务已经停止、下一次会根据此id来找到上一次已经下载完成的ts文件，开始下载之前，会判断是否已经下载过了，下载了就不再下载
+     */
+    private String taskId = "0";
     /**
      * 线程池最大线程数，默认为5
      */
     private int threadCount = 5;
+    /**
+     * 定时任务
+     */
+    private Timer netSpeedTimer;
     private ExecutorService executor;//线程池
     private Handler mHandler = new Handler() {
         @Override
@@ -49,10 +79,13 @@ public class M3U8DownloadManger {
                 case WHAT_ON_ERROR:
                     onDownloadListener.onError((Throwable) msg.obj);
                     break;
-                case WHAT_ON_NEXT:
-                    onDownloadListener.onDownloading((Long) msg.obj, msg.arg1, msg.arg2);
+                case WHAT_ON_PROGRESS:
+                    onDownloadListener.onDownloading(itemFileSize, totalTs, curTs);
                     break;
                 case WHAT_ON_SUCCESS:
+                    if (netSpeedTimer != null) {
+                        netSpeedTimer.cancel();
+                    }
                     onDownloadListener.onSuccess();
                     break;
             }
@@ -65,13 +98,17 @@ public class M3U8DownloadManger {
      * @param url
      * @param onDownloadListener
      */
-    public void download(String url, OnDownloadListener onDownloadListener) {
+    public void download(final String url, OnDownloadListener onDownloadListener) {
         this.onDownloadListener = onDownloadListener;
         if (!isRunning()) {
             getM3U8Info(url);
         } else {
             handlerError(new Throwable("Task running"));
         }
+    }
+
+    public String getTaskId() {
+        return taskId;
     }
 
     /**
@@ -91,34 +128,44 @@ public class M3U8DownloadManger {
     private void getM3U8Info(String url) {
         M3U8InfoManger.getInstance().getM3U8Info(url, new OnM3U8InfoListener() {
             @Override
-            public void onSuccess(M3U8 m3U8) {
-                try {
-                    Log.e("hdltag", "onSuccess(M3U8DownloadManger.java:74):" + m3U8);
-                    startDownload(m3U8);
-                    Log.e("hdltag", "onSuccess(M3U8DownloadManger.java:79):startDownload 之后了");
-                    if (executor != null) {
-                        executor.shutdown();//下载完成之后要关闭线程池
+            public void onSuccess(final M3U8 m3U8) {
+                new Thread() {
+                    @Override
+                    public void run() {
+                        try {
+                            startDownload(m3U8);
+                            if (executor != null) {
+                                executor.shutdown();//下载完成之后要关闭线程池
+                            }
+                            while (executor != null && !executor.isTerminated()) {
+                                //等待中
+                                Thread.sleep(100);
+                            }
+                            if (isRunning) {
+                                String saveFileName = System.currentTimeMillis() + ".ts";
+                                String tempSaveFile = tempDir + File.separator + saveFileName;//生成临时文件
+                                MUtils.merge(m3U8, tempSaveFile, tempDir);//合并ts
+                                //移动到指定的目录
+                                MUtils.moveFile(tempSaveFile, saveFilePath + File.separator + saveFileName);//移动到指定文件夹
+                                MUtils.clearDir(new File(tempDir));//清空一下临时文件
+                                mHandler.sendEmptyMessage(WHAT_ON_SUCCESS);
+                                isRunning = false;
+                            }
+                        } catch (InterruptedIOException e) {
+//                    e.printStackTrace();
+                            //被中断了，使用stop时会抛出这个，不需要处理
+//                            handlerError(e);
+                            return;
+                        } catch (IOException e) {
+//                    e.printStackTrace();
+                            handlerError(e);
+                            return;
+                        } catch (InterruptedException e) {
+//                            e.printStackTrace();
+                            handlerError(e);
+                        }
                     }
-                    while (executor != null && !executor.isTerminated()) {
-                        Thread.sleep(100);
-                    }
-                    String saveFileName = System.currentTimeMillis() + ".ts";
-                    String tempSaveFile = tempDir + File.separator + saveFileName;//生成临时文件
-                    MUtils.merge(m3U8, tempSaveFile, tempDir);//合并ts
-                    //移动到指定的目录
-                    MUtils.moveFile(tempSaveFile, saveFilePath + File.separator + saveFileName);//移动到指定文件夹
-                    MUtils.clearDir(new File(tempDir));//清空一下临时文件
-                    Log.e("hdltag", "onSuccess(M3U8DownloadManger.java:88):下载完成了");
-                    mHandler.sendEmptyMessage(WHAT_ON_SUCCESS);
-                    isRunning = false;
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    handlerError(e);
-                    return;
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    handlerError(e);
-                }
+                }.start();
             }
 
             @Override
@@ -140,16 +187,14 @@ public class M3U8DownloadManger {
      * @param m3U8
      */
     private void startDownload(final M3U8 m3U8) {
-        //需要加上当前时间作为文件夹（由于合并时是根据文件夹来合并的，合并之后需要删除所有的ts文件，这里用到了多线程，所以需要按文件夹来存ts）
-        tempDir += File.separator + System.currentTimeMillis();
         final File dir = new File(tempDir);
         //没有就创建
         if (!dir.exists()) {
             dir.mkdirs();
-        } else {
+        }/* else {
             //有就清空内容
             MUtils.clearDir(dir);
-        }
+        }*/
         totalTs = m3U8.getTsList().size();
         if (executor != null && executor.isTerminated()) {
             executor.shutdownNow();
@@ -157,6 +202,13 @@ public class M3U8DownloadManger {
         }
         executor = Executors.newFixedThreadPool(threadCount);
         final String basePath = m3U8.getBasepath();
+        netSpeedTimer = new Timer();
+        netSpeedTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                onDownloadListener.onProgress(curLenght);
+            }
+        }, 0, 1000);
         for (final M3U8Ts m3U8Ts : m3U8.getTsList()) {//循环下载
             executor.execute(new Runnable() {
                 @Override
@@ -176,30 +228,32 @@ public class M3U8DownloadManger {
                                 int len = 0;
                                 byte[] buf = new byte[8 * 1024 * 1024];
                                 while ((len = inputStream.read(buf)) != -1) {
+                                    curLenght += len;
                                     fos.write(buf, 0, len);//写入流中
                                 }
+//                                Log.e("hdltag", "run(M3U8DownloadTask.java:188):进度\t" + totalTs + "-----" + curTs);
                             } else {
                                 handlerError(new Throwable(String.valueOf(conn.getResponseCode())));
                             }
                         } catch (MalformedURLException e) {
-                            e.printStackTrace();
+//                            e.printStackTrace();
                             handlerError(e);
                         } catch (IOException e) {
-                            e.printStackTrace();
+//                            e.printStackTrace();
                             handlerError(e);
                         } finally {//关流
                             if (inputStream != null) {
                                 try {
                                     inputStream.close();
                                 } catch (IOException e) {
-                                    e.printStackTrace();
+//                                    e.printStackTrace();
                                 }
                             }
                             if (fos != null) {
                                 try {
                                     fos.close();
                                 } catch (IOException e) {
-                                    e.printStackTrace();
+//                                    e.printStackTrace();
                                 }
                             }
                         }
@@ -207,8 +261,7 @@ public class M3U8DownloadManger {
                         if (curTs == 3) {
                             itemFileSize = file.length();
                         }
-                        Log.e("hdltag", "run(M3U8DownloadManger.java:181):下载进度： " + totalTs + "-" + curTs);
-                        handlerNext(itemFileSize, totalTs, curTs);
+                        mHandler.sendEmptyMessage(WHAT_ON_PROGRESS);
                     }
                 }
             });
@@ -221,6 +274,13 @@ public class M3U8DownloadManger {
      * @param e
      */
     private void handlerError(Throwable e) {
+        if (!"Task running".equals(e.getMessage())) {
+            stop();
+        }
+        //不提示被中断的情况
+        if ("thread interrupted".equals(e.getMessage())) {
+            return;
+        }
         Message msg = mHandler.obtainMessage();
         msg.obj = e;
         msg.what = WHAT_ON_ERROR;
@@ -228,18 +288,27 @@ public class M3U8DownloadManger {
     }
 
     /**
-     * 下载完成一次
-     *
-     * @param itemFileSize
-     * @param totalTs
-     * @param curTs
+     * 停止任务
      */
-    private void handlerNext(long itemFileSize, int totalTs, int curTs) {
-        Message msg = mHandler.obtainMessage();
-        msg.obj = itemFileSize;
-        msg.arg1 = totalTs;
-        msg.arg2 = curTs;
-        msg.what = WHAT_ON_NEXT;
-        mHandler.sendMessage(msg);
+    public void stop() {
+        if (netSpeedTimer != null) {
+            netSpeedTimer.cancel();
+            netSpeedTimer = null;
+        }
+        isRunning = false;
+        if (executor != null) {
+            executor.shutdownNow();
+        }
     }
+
+//    /**
+//     * 获取当前下载速度
+//     *
+//     * @param max 最大值
+//     * @return
+//     */
+//    public String getNetSpeed(int max) {
+//        int speed = (int) (Math.random() * max + 1);
+//        return speed + " kb/s";
+//    }
 }
