@@ -45,11 +45,11 @@ public class M3U8DownloadTask {
     //最终文件保存的路径
     private String saveFilePath = Environment.getExternalStorageDirectory().getPath() + File.separator + "11m3u8";
     //当前下载完成的文件个数
-    private int curTs = 0;
+    private static int curTs = 0;
     //总文件的个数
-    private int totalTs = 0;
+    private static int totalTs = 0;
     //单个文件的大小
-    private long itemFileSize = 0;
+    private static long itemFileSize = 0;
     /**
      * 当前已经在下完成的大小
      */
@@ -67,6 +67,10 @@ public class M3U8DownloadTask {
      * 线程池最大线程数，默认为5
      */
     private int threadCount = 5;
+    /**
+     * 时候清楚临时目录，默认清除
+     */
+    private boolean isClearTempDir = true;
     /**
      * 定时任务
      */
@@ -107,6 +111,14 @@ public class M3U8DownloadTask {
         }
     }
 
+    public boolean isClearTempDir() {
+        return isClearTempDir;
+    }
+
+    public void setClearTempDir(boolean clearTempDir) {
+        isClearTempDir = clearTempDir;
+    }
+
     public String getTaskId() {
         return taskId;
     }
@@ -142,12 +154,19 @@ public class M3U8DownloadTask {
                                 Thread.sleep(100);
                             }
                             if (isRunning) {
-                                String saveFileName = saveFilePath.substring(saveFilePath.lastIndexOf("/")+1);
+                                String saveFileName = saveFilePath.substring(saveFilePath.lastIndexOf("/") + 1);
                                 String tempSaveFile = tempDir + File.separator + saveFileName;//生成临时文件
                                 MUtils.merge(m3U8, tempSaveFile, tempDir);//合并ts
                                 //移动到指定的目录
                                 MUtils.moveFile(tempSaveFile, saveFilePath);//移动到指定文件夹
-                                MUtils.clearDir(new File(tempDir));//清空一下临时文件
+                                if (isClearTempDir) {
+                                    mHandler.postDelayed(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            MUtils.clearDir(new File(tempDir));//清空一下临时文件
+                                        }
+                                    }, 10 * 1000);
+                                }
                                 mHandler.sendEmptyMessage(WHAT_ON_SUCCESS);
                                 isRunning = false;
                             }

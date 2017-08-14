@@ -71,6 +71,7 @@ public class Main2Activity extends AppCompatActivity {
     M3U8DownloadTask task1 = new M3U8DownloadTask("1001");
 
     public void onDownload(View view) {
+        task1.setSaveFilePath("/sdcard/111/hdl.ts");
         task1.download(url, new OnDownloadListener() {
             @Override
             public void onDownloading(final long itemFileSize, final int totalTs, final int curTs) {
