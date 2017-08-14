@@ -26,80 +26,104 @@
 ### 导入：
 
 ```java
-compile 'com.jwkj:M3U8Manger:v1.0.8'
+compile 'com.jwkj:M3U8Manger:v2.0.6'
 ```
 
 ### 获取M3U8信息：
 
 ```java
- M3U8Manger.getInstance()
-                .setUrl(url)
-                .getM3U8(new M3U8Listener() {
-                    @Override
-                    public void onStart() {
-                        Log.e("hdltag", "onStart(MainActivity.java:75):开始了" );
-                    }
+   M3U8InfoManger.getInstance().getM3U8Info(url, new OnM3U8InfoListener() {
+            @Override
+            public void onSuccess(M3U8 m3U8) {
+                ELog.e("获取成功了" + m3U8);
+            }
 
-                    @Override
-                    public void onError(Throwable errorMsg) {
-                        Log.e("hdltag", "onStart(MainActivity.java:75):出错了"+errorMsg );
-                    }
+            @Override
+            public void onStart() {
+                ELog.e("开始获取信息");
+            }
 
-                    @Override
-                    public void onCompleted() {
-                        Log.e("hdltag", "onStart(MainActivity.java:75):完成了" );
-                    }
-
-                    @Override
-                    public void onM3U8Info(M3U8 m3U8) {
-                        Log.e("hdltag", "onStart(MainActivity.java:75):拿到结果了"+m3U8 );
-                        Log.e("hdltag", "onM3U8Info(MainActivity.java:91):" + m3U8.getTsList());
-                    }
-                });
+            @Override
+            public void onError(Throwable errorMsg) {
+                ELog.e("出错了" + errorMsg);
+            }
+        });
 ```
 
 
 ### 下载M3U8格式的视频文件：
 
 ```java
-M3U8Manger.getInstance()
-                .setUrl(url)
-                .setSaveFilePath("/sdcard/11/"+System.currentTimeMillis()+".ts")
-                .download(new M3U8Listener() {
-                    @Override
-                    public void onStart() {
-                        Toast.makeText(MainActivity.this, "开始下载了", Toast.LENGTH_SHORT).show();
-                    }
+ M3U8DownloadTask task1 = new M3U8DownloadTask("1001");
 
-                    @Override
-                    public void onError(Throwable errorMsg) {
-                        Log.e("hdltag", "onError(MainActivity.java:28):下载出错了" + errorMsg);
-                    }
+    public void onDownload(View view) {
+        task1.download(url, new OnDownloadListener() {
+            @Override
+            public void onDownloading(final long itemFileSize, final int totalTs, final int curTs) {
+                ELog.e(task1.getTaskId() + "下载中.....itemFileSize=" + itemFileSize + "\ttotalTs=" + totalTs + "\tcurTs=" + curTs);
+            }
 
-                    @Override
-                    public void onCompleted() {
-                        Log.e("hdltag", "onCompleted(MainActivity.java:33):下载完成了");
-                    }
+            /**
+             * 下载成功
+             */
+            @Override
+            public void onSuccess() {
+                ELog.e(task1.getTaskId() + "下载完成了");
+            }
 
-                    @Override
-                    public void onLoadFileSizeForItem(long fileSize) {//fileSize的单位是b
-                       Log.e("hdltag", "onLoadFileSizeForItem(MainActivity.java:63):fileSize=" + fileSize + " b");
-                    }
+            /**
+             * 当前的进度回调
+             *
+             * @param curLenght
+             */
+            @Override
+            public void onProgress(final long curLenght) {
+                if (curLenght - lastLength > 0) {
+                    final String speed = NetSpeedUtils.getInstance().displayFileSize(curLenght - lastLength) + "/s";
+                    ELog.e(task1.getTaskId() + "speed = " + speed);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ELog.e("更新了");
+                            tvSpeed1.setText(speed);
+                            ELog.e(tvSpeed1.getText().toString());
+                        }
+                    });
+                    lastLength = curLenght;
 
-                    @Override
-                    public void onDownloadingProgress(int total, int progress) {//total表示总的ts数，progress当前已经下载完成的ts数
-                           Log.e("hdltag", "onDownloadingProgress(MainActivity.java:126):" + total + " ------ " + progress);
-                    }
-                });
+                }
+            }
+
+            @Override
+            public void onStart() {
+                ELog.e(task1.getTaskId() + "开始下载了");
+            }
+
+            @Override
+            public void onError(Throwable errorMsg) {
+                ELog.e(task1.getTaskId() + "出错了" + errorMsg);
+            }
+        });
+    }
+
 ```
 
 ### 停止任务：
 
 ```java
-    M3U8Manger.getInstance().stop();
+      task1.stop();
 ```
 
 ## 版本记录
+
+### v2.x
+
+v2.0.6([2017.08.14]())
+- 【新增】断点续传
+- 【新增】支持多任务
+- 【优化】下载速度不准确问题
+
+### V1.x
 
 v1.0.8([2017.08.08]())
 - 【新增】onLoadFileSizeForItem方法（获取单个ts文件的平均大小）
