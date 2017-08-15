@@ -5,9 +5,11 @@
 - 中途停止任务
 - 获取下载速度
 - 支持多任务下载
+> **温馨提示：** 请通过issue渠道提bug和改进建议
 
 适用性：适用以下格式的m3u8格式（ts切片的名字就是当前时间eg:1500480000074.ts），其他格式的需要自己修改源码中的解析规则。
-```
+
+```java
 #EXTM3U
 #EXT-X-VERSION:3
 #EXT-X-MEDIA-SEQUENCE:0
@@ -28,7 +30,7 @@
 ### 导入：
 
 ```java
-compile 'com.jwkj:M3U8Manger:v2.1.1'
+compile 'com.jwkj:M3U8Manger:v2.1.6'
 ```
 
 ### 获取M3U8信息：
@@ -57,8 +59,8 @@ compile 'com.jwkj:M3U8Manger:v2.1.1'
 
 ```java
  M3U8DownloadTask task1 = new M3U8DownloadTask("1001");
-
-    public void onDownload(View view) {
+//下载按钮监听事件
+ public void onDownload(View view) {
         task1.download(url, new OnDownloadListener() {
             @Override
             public void onDownloading(final long itemFileSize, final int totalTs, final int curTs) {
@@ -120,7 +122,10 @@ compile 'com.jwkj:M3U8Manger:v2.1.1'
 
 ### v2.x
 
-v2.1.4([2017.08.14]())
+v2.1.6([2017.08.15]())
+- 【新增】设置连接超时时间、读取超时时间
+
+v2.1.4、v2.1.5([2017.08.14]())
 - 【优化】延迟删除临时文件（因为存取速度比较低的设备可能存在未移动完成而被删除情况）
 
 v2.1.3([2017.08.14]())

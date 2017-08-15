@@ -72,6 +72,14 @@ public class M3U8DownloadTask {
      */
     private boolean isClearTempDir = true;
     /**
+     * 读取超时时间
+     */
+    private int readTimeout = 30 * 60 * 1000;
+    /**
+     * 链接超时时间
+     */
+    private int connTimeout = 10 * 1000;
+    /**
      * 定时任务
      */
     private Timer netSpeedTimer;
@@ -109,6 +117,22 @@ public class M3U8DownloadTask {
         } else {
             handlerError(new Throwable("Task running"));
         }
+    }
+
+    public long getReadTimeout() {
+        return readTimeout;
+    }
+
+    public void setReadTimeout(int readTimeout) {
+        this.readTimeout = readTimeout;
+    }
+
+    public long getConnTimeout() {
+        return connTimeout;
+    }
+
+    public void setConnTimeout(int connTimeout) {
+        this.connTimeout = connTimeout;
     }
 
     public boolean isClearTempDir() {
@@ -165,7 +189,7 @@ public class M3U8DownloadTask {
                                         public void run() {
                                             MUtils.clearDir(new File(tempDir));//清空一下临时文件
                                         }
-                                    }, 10 * 1000);
+                                    }, 20 * 1000);//20s之后再删除
                                 }
                                 mHandler.sendEmptyMessage(WHAT_ON_SUCCESS);
                                 isRunning = false;
@@ -239,8 +263,8 @@ public class M3U8DownloadTask {
                         try {
                             URL url = new URL(basePath + m3U8Ts.getFile());
                             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                            conn.setConnectTimeout(10 * 1000);
-                            conn.setReadTimeout(10 * 60 * 1000);
+                            conn.setConnectTimeout(connTimeout);
+                            conn.setReadTimeout(readTimeout);
                             if (conn.getResponseCode() == 200) {
                                 inputStream = conn.getInputStream();
                                 fos = new FileOutputStream(file);//会自动创建文件
