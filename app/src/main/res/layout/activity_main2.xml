@@ -7,11 +7,24 @@
     android:orientation="vertical"
     tools:context="com.hdl.m3u8demo.Main2Activity">
 
+    <EditText
+        android:id="@+id/et_url"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="下载地址"
+        android:singleLine="true" />
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="onGetInfo"
-        android:text="获取M3U8信息" />
+        android:text="获取M3U8信息"
+        android:visibility="gone" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="默认保存在/sdcard/111/******.ts" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -22,13 +35,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="onDownload"
-            android:text="下载任务1" />
+            android:text="下载" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="onStopTask1"
-            android:text="停止任务1" />
+            android:text="停止" />
 
         <TextView
             android:id="@+id/tv_speed1"
@@ -37,26 +50,16 @@
             android:text="0 kb/s" />
     </LinearLayout>
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="onDownloadTask2"
-            android:text="下载任务2" />
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="onStopTask2"
-            android:text="停止任务2" />
+        android:layout_height="match_parent"
+        android:background="#232323">
 
         <TextView
-            android:id="@+id/tv_speed2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="0 kb/s" />
-    </LinearLayout>
+            android:id="@+id/tv_console"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="console:"
+            android:textColor="#fff" />
+    </ScrollView>
 </LinearLayout>

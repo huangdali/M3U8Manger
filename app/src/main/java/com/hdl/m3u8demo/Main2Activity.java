@@ -3,6 +3,7 @@ package com.hdl.m3u8demo;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.hdl.elog.ELog;
@@ -17,9 +18,9 @@ import com.hdl.m3u8demo.runtimepermissions.PermissionsResultAction;
 
 public class Main2Activity extends AppCompatActivity {
     private String url = "http://gwell-oss-test1.oss-cn-shenzhen.aliyuncs.com/video-123yun/2017-07-20%2000%3A00%3A00.m3u8";
-    private String url2 = "http://gwell-oss-test1.oss-cn-shenzhen.aliyuncs.com/video-123yun/2017-07-20%2017%3A00%3A00.m3u8";
     private TextView tvSpeed1;
-    private TextView tvSpeed2;
+    private EditText etUrl;
+    private TextView tvConsole;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,7 +28,8 @@ public class Main2Activity extends AppCompatActivity {
         setContentView(R.layout.activity_main2);
         requestPermission();
         tvSpeed1 = (TextView) findViewById(R.id.tv_speed1);
-        tvSpeed2 = (TextView) findViewById(R.id.tv_speed2);
+        etUrl = (EditText) findViewById(R.id.et_url);
+        tvConsole = (TextView) findViewById(R.id.tv_console);
     }
 
     private void requestPermission() {
@@ -71,11 +73,13 @@ public class Main2Activity extends AppCompatActivity {
     M3U8DownloadTask task1 = new M3U8DownloadTask("1001");
 
     public void onDownload(View view) {
-        task1.setSaveFilePath("/sdcard/111/hdl.ts");
-        task1.download(url, new OnDownloadListener() {
+        url = etUrl.getText().toString();
+        task1.setSaveFilePath("/sdcard/111/" + System.currentTimeMillis() + ".ts");
+        task1.download(this.url, new OnDownloadListener() {
             @Override
             public void onDownloading(final long itemFileSize, final int totalTs, final int curTs) {
                 ELog.e(task1.getTaskId() + "下载中.....itemFileSize=" + itemFileSize + "\ttotalTs=" + totalTs + "\tcurTs=" + curTs);
+                tvConsole.append("\n\n下载中....." + itemFileSize + "\t" + totalTs + "\t" + curTs);
             }
 
             /**
@@ -84,6 +88,7 @@ public class Main2Activity extends AppCompatActivity {
             @Override
             public void onSuccess() {
                 ELog.e(task1.getTaskId() + "下载完成了");
+                tvConsole.append("\n\n下载完成");
             }
 
             /**
@@ -112,74 +117,18 @@ public class Main2Activity extends AppCompatActivity {
             @Override
             public void onStart() {
                 ELog.e(task1.getTaskId() + "开始下载了");
+                tvConsole.append("\n\n开始下载");
             }
 
             @Override
             public void onError(Throwable errorMsg) {
+                tvConsole.append("\n\n出错了" + errorMsg);
                 ELog.e(task1.getTaskId() + "出错了" + errorMsg);
-            }
-        });
-    }
-
-    M3U8DownloadTask task2 = new M3U8DownloadTask("1002");
-
-    /**
-     * 下载任务2
-     *
-     * @param view
-     */
-    public void onDownloadTask2(View view) {
-        task2.download(url2, new OnDownloadListener() {
-            @Override
-            public void onDownloading(final long itemFileSize, final int totalTs, final int curTs) {
-                ELog.e(task2.getTaskId() + "下载中.....itemFileSize=" + itemFileSize + "\ttotalTs=" + totalTs + "\tcurTs=" + curTs);
-            }
-
-            /**
-             * 下载成功
-             */
-            @Override
-            public void onSuccess() {
-                ELog.e(task2.getTaskId() + "下载完成了");
-            }
-
-            /**
-             * 当前的进度回调
-             *
-             * @param curLenght
-             */
-            @Override
-            public void onProgress(final long curLenght) {
-                if (curLenght - lastLength > 0) {
-                    final String speed = NetSpeedUtils.getInstance().displayFileSize(curLenght - lastLength) + "/s";
-                    ELog.e(task2.getTaskId() + " speed = " + speed);
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            tvSpeed2.setText(speed);
-                        }
-                    });
-                    lastLength = curLenght;
-                }
-            }
-
-            @Override
-            public void onStart() {
-                ELog.e(task2.getTaskId() + "开始下载了");
-            }
-
-            @Override
-            public void onError(Throwable errorMsg) {
-                ELog.e(task2.getTaskId() + "出错了" + errorMsg);
             }
         });
     }
 
     public void onStopTask1(View view) {
         task1.stop();
-    }
-
-    public void onStopTask2(View view) {
-        task2.stop();
     }
 }
