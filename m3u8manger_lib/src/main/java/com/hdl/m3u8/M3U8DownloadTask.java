@@ -64,9 +64,9 @@ public class M3U8DownloadTask {
      */
     private String taskId = "0";
     /**
-     * 线程池最大线程数，默认为5
+     * 线程池最大线程数，默认为3
      */
-    private int threadCount = 5;
+    private int threadCount = 3;
     /**
      * 时候清楚临时目录，默认清除
      */
@@ -103,6 +103,14 @@ public class M3U8DownloadTask {
             }
         }
     };
+
+    /**
+     * 设置最大线程数
+     * @param threadCount
+     */
+    public void setThreadCount(int threadCount) {
+        this.threadCount = threadCount;
+    }
 
     /**
      * 开始下载

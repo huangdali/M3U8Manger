@@ -39,7 +39,7 @@ publish{
     userOrg = 'huangdali'//bintray.com的用户名
     groupId = 'com.jwkj'//jcenter上的路径
     artifactId = 'M3U8Manger'//项目名称
-    publishVersion = 'v2.1.6'//版本号
+    publishVersion = 'v2.1.7'//版本号
     desc = 'M3U8管理器'//描述，不重要
     website = siteUrl//项目主页
 }
