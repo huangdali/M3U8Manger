@@ -2,7 +2,6 @@ package com.hdl.m3u8;
 
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 
 import com.hdl.m3u8.bean.M3U8;
 import com.hdl.m3u8.bean.OnM3U8InfoListener;
@@ -59,7 +58,7 @@ public class M3U8InfoManger {
             @Override
             public void run() {
                 try {
-                    Log.e("hdltag", "run(M3U8InfoManger.java:62):" + url);
+//                    Log.e("hdltag", "run(M3U8InfoManger.java:62):" + url);
                     M3U8 m3u8 = MUtils.parseIndex(url);
                     handlerSuccess(m3u8);
                 } catch (IOException e) {

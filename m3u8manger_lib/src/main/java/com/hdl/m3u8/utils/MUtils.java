@@ -14,6 +14,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,36 +33,39 @@ public class MUtils {
      * @throws IOException
      */
     public static M3U8 parseIndex(String url) throws IOException {
+        HttpURLConnection conn= (HttpURLConnection) new URL(url).openConnection();
+        if (conn.getResponseCode()==200) {
+            String realUrl = conn.getURL().toString();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String basepath = realUrl.substring(0, realUrl.lastIndexOf("/") + 1);
+            M3U8 ret = new M3U8();
+            ret.setBasepath(basepath);
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(new URL(url).openStream()));
-
-        String basepath = url.substring(0, url.lastIndexOf("/") + 1);
-
-        M3U8 ret = new M3U8();
-        ret.setBasepath(basepath);
-
-        String line;
-        float seconds = 0;
-        while ((line = reader.readLine()) != null) {
-            if (line.startsWith("#")) {
-                if (line.startsWith("#EXTINF:")) {
-                    line = line.substring(8);
-                    if (line.endsWith(",")) {
-                        line = line.substring(0, line.length() - 1);
+            String line;
+            float seconds = 0;
+            while ((line = reader.readLine()) != null) {
+                if (line.startsWith("#")) {
+                    if (line.startsWith("#EXTINF:")) {
+                        line = line.substring(8);
+                        if (line.endsWith(",")) {
+                            line = line.substring(0, line.length() - 1);
+                        }
+                        seconds = Float.parseFloat(line);
                     }
-                    seconds = Float.parseFloat(line);
+                    continue;
                 }
-                continue;
+                if (line.endsWith("m3u8")) {
+                    return parseIndex(basepath + line);
+                }
+                ret.addTs(new M3U8Ts(line, seconds));
+                seconds = 0;
             }
-            if (line.endsWith("m3u8")) {
-                return parseIndex(basepath + line);
-            }
-            ret.addTs(new M3U8Ts(line, seconds));
-            seconds = 0;
-        }
-        reader.close();
+            reader.close();
 
-        return ret;
+            return ret;
+        }else{
+            return null;
+        }
     }
 
     /**
