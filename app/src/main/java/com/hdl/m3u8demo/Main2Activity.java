@@ -17,7 +17,8 @@ import com.hdl.m3u8demo.runtimepermissions.PermissionsManager;
 import com.hdl.m3u8demo.runtimepermissions.PermissionsResultAction;
 
 public class Main2Activity extends AppCompatActivity {
-    private String url = "http://gwell-oss-test1.oss-cn-shenzhen.aliyuncs.com/video-123yun/2017-07-20%2000%3A00%3A00.m3u8";
+    //url随时可能失效
+    private String url = "http://d7.v.ggo.net:8099/hls/20FE725C1EA6521AF258DB5BDB892B41F9ACE9/fdb4f3e5b9980d78b2031a2d2fa1116fd4aec5e9/1/index.m3u8";
     private TextView tvSpeed1;
     private EditText etUrl;
     private TextView tvConsole;
@@ -53,16 +54,19 @@ public class Main2Activity extends AppCompatActivity {
         M3U8InfoManger.getInstance().getM3U8Info(url, new OnM3U8InfoListener() {
             @Override
             public void onSuccess(M3U8 m3U8) {
+                tvConsole.append("\n\n获取成功了" + m3U8);
                 ELog.e("获取成功了" + m3U8);
             }
 
             @Override
             public void onStart() {
+                tvConsole.append("\n\n开始获取信息" );
                 ELog.e("开始获取信息");
             }
 
             @Override
             public void onError(Throwable errorMsg) {
+                tvConsole.append("\n\n出错了" + errorMsg);
                 ELog.e("出错了" + errorMsg);
             }
         });
@@ -73,9 +77,9 @@ public class Main2Activity extends AppCompatActivity {
     M3U8DownloadTask task1 = new M3U8DownloadTask("1001");
 
     public void onDownload(View view) {
-        url = etUrl.getText().toString();
+//        url = etUrl.getText().toString();
         task1.setSaveFilePath("/sdcard/111/" + System.currentTimeMillis() + ".ts");
-        task1.download(this.url, new OnDownloadListener() {
+        task1.download(url, new OnDownloadListener() {
             @Override
             public void onDownloading(final long itemFileSize, final int totalTs, final int curTs) {
                 ELog.e(task1.getTaskId() + "下载中.....itemFileSize=" + itemFileSize + "\ttotalTs=" + totalTs + "\tcurTs=" + curTs);

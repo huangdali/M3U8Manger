@@ -41,7 +41,11 @@ public class M3U8Ts implements Comparable<M3U8Ts> {
      * 获取时间
      */
     public long getLongDate() {
-        return Long.parseLong(file.substring(0, file.lastIndexOf(".")));
+        try {
+            return Long.parseLong(file.substring(0, file.lastIndexOf(".")));
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
     @Override

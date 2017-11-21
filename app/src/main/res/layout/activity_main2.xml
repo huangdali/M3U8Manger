@@ -19,7 +19,7 @@
         android:layout_height="wrap_content"
         android:onClick="onGetInfo"
         android:text="获取M3U8信息"
-        android:visibility="gone" />
+        />
 
     <TextView
         android:layout_width="match_parent"
