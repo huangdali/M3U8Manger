@@ -33,8 +33,8 @@ public class MUtils {
      * @throws IOException
      */
     public static M3U8 parseIndex(String url) throws IOException {
-        HttpURLConnection conn= (HttpURLConnection) new URL(url).openConnection();
-        if (conn.getResponseCode()==200) {
+        HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+        if (conn.getResponseCode() == 200) {
             String realUrl = conn.getURL().toString();
             BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             String basepath = realUrl.substring(0, realUrl.lastIndexOf("/") + 1);
@@ -63,7 +63,7 @@ public class MUtils {
             reader.close();
 
             return ret;
-        }else{
+        } else {
             return null;
         }
     }
@@ -101,11 +101,12 @@ public class MUtils {
         for (M3U8Ts ts : mergeList) {
             file = new File(basePath, ts.getFile());
             if (file.isFile() && file.exists()) {
-                IOUtils.copyLarge(new FileInputStream(file), fos);
+                IOUtils.copy(new FileInputStream(file), fos, 2*1024* 1024 * 1024);
             }
         }
         fos.close();
     }
+
     /**
      * 移动文件
      *

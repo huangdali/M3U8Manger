@@ -18,7 +18,8 @@ import com.hdl.m3u8demo.runtimepermissions.PermissionsResultAction;
 
 public class Main2Activity extends AppCompatActivity {
     //url随时可能失效
-    private String url = "http://d7.v.ggo.net:8099/hls/20FE725C1EA6521AF258DB5BDB892B41F9ACE9/fdb4f3e5b9980d78b2031a2d2fa1116fd4aec5e9/1/index.m3u8";
+    private String url = "http://suo.im/zAt2p1";
+
     private TextView tvSpeed1;
     private EditText etUrl;
     private TextView tvConsole;
