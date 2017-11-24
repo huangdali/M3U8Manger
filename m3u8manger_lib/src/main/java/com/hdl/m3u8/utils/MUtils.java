@@ -101,7 +101,7 @@ public class MUtils {
         for (M3U8Ts ts : mergeList) {
             file = new File(basePath, ts.getFile());
             if (file.isFile() && file.exists()) {
-                IOUtils.copy(new FileInputStream(file), fos, 2*1024* 1024 * 1024);
+                IOUtils.copyLarge(new FileInputStream(file), fos);
             }
         }
         fos.close();

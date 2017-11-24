@@ -34,7 +34,7 @@
 ### 导入：
 
 ```java
-compile 'com.jwkj:M3U8Manger:v2.2.1'
+compile 'com.jwkj:M3U8Manger:v2.1.9'
 ```
 
 ### 获取M3U8信息：
@@ -126,8 +126,6 @@ compile 'com.jwkj:M3U8Manger:v2.2.1'
 
 ### v2.x
 
-v2.2.1([2017.11.22]())
-- 【优化】合并ts文件时的缓冲区大小设置为2GB
 
 v2.1.9([2017.11.21]())
 - 【优化】支持url重定向处理过的m3u8
