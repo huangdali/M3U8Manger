@@ -238,6 +238,10 @@ public class M3U8DownloadTask {
      * @param m3U8
      */
     private void startDownload(final M3U8 m3U8) {
+        if (m3U8 == null) {
+            handlerError(new Throwable("M3U8 is null"));
+            return;
+        }
         final File dir = new File(tempDir);
         //没有就创建
         if (!dir.exists()) {
