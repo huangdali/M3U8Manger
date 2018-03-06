@@ -3,6 +3,7 @@ package com.hdl.m3u8;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 import com.hdl.m3u8.bean.M3U8;
 import com.hdl.m3u8.bean.M3U8Ts;
@@ -106,6 +107,7 @@ public class M3U8DownloadTask {
 
     /**
      * 设置最大线程数
+     *
      * @param threadCount
      */
     public void setThreadCount(int threadCount) {
@@ -268,12 +270,20 @@ public class M3U8DownloadTask {
             executor.execute(new Runnable() {
                 @Override
                 public void run() {
-                    File file = new File(dir + File.separator + m3U8Ts.getFile());
+                    File file = new File(dir + File.separator + m3U8Ts.getFileName());
                     if (!file.exists()) {//下载过的就不管了
                         FileOutputStream fos = null;
                         InputStream inputStream = null;
                         try {
-                            URL url = new URL(basePath + m3U8Ts.getFile());
+                            Log.e("hdltag", "run(M3U8DownloadTask.java:278):" + m3U8Ts.getFile());
+                            String urlPath;
+                            if ("http".equals(m3U8Ts.getFile().substring(0, 4))) {
+                                urlPath = m3U8Ts.getFile();
+                            } else {
+                                urlPath = basePath + m3U8Ts.getFile();
+                            }
+                            URL url = new URL(urlPath);
+
                             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                             conn.setConnectTimeout(connTimeout);
                             conn.setReadTimeout(readTimeout);

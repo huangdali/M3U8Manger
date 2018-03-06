@@ -314,8 +314,8 @@ public class M3U8Manger {
                                 FileOutputStream writer = null;
                                 long size = 0;
                                 try {
-                                    writer = new FileOutputStream(new File(dir, ts.getFile()));
-                                    size = IOUtils.copyLarge(new URL(m3u8.getBasepath() + ts.getFile()).openStream(), writer);
+                                    writer = new FileOutputStream(new File(dir, ts.getFileName()));
+                                    size = IOUtils.copyLarge(new URL(m3u8.getBasepath() + ts.getFileName()).openStream(), writer);
                                 } catch (InterruptedIOException exception) {
                                     isRunning = false;
                                     currDownloadTsCount = 0;
@@ -328,7 +328,7 @@ public class M3U8Manger {
                                 }
                                 currDownloadTsCount++;
                                 if (currDownloadTsCount == 2) {//由于每个ts文件的大小基本是固定的（头尾有点差距），可以通过单个文件的大小来算整个文件的大小
-                                    long length = new File(dir, ts.getFile()).length();
+                                    long length = new File(dir, ts.getFileName()).length();
                                     Message msg = mHandler.obtainMessage();
                                     msg.what = WHAT_ON_FILESIZE_ITEM;
                                     msg.obj = length;

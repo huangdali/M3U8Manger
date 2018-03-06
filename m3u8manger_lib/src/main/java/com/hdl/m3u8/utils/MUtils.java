@@ -81,7 +81,7 @@ public class MUtils {
         FileOutputStream fos = new FileOutputStream(file);
 
         for (M3U8Ts ts : mergeList) {
-            IOUtils.copyLarge(new FileInputStream(new File(file.getParentFile(), ts.getFile())), fos);
+            IOUtils.copyLarge(new FileInputStream(new File(file.getParentFile(), ts.getFileName())), fos);
         }
         fos.close();
     }
@@ -99,7 +99,7 @@ public class MUtils {
         FileOutputStream fos = new FileOutputStream(saveFile);
         File file;
         for (M3U8Ts ts : mergeList) {
-            file = new File(basePath, ts.getFile());
+            file = new File(basePath, ts.getFileName());
             if (file.isFile() && file.exists()) {
                 IOUtils.copyLarge(new FileInputStream(file), fos);
             }

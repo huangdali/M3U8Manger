@@ -34,7 +34,7 @@
 ### 导入：
 
 ```java
-compile 'com.jwkj:M3U8Manger:v2.1.9'
+compile 'com.jwkj:M3U8Manger:v2.2.0'
 ```
 
 ### 获取M3U8信息：
@@ -126,6 +126,9 @@ compile 'com.jwkj:M3U8Manger:v2.1.9'
 
 ### v2.x
 
+
+v2.2.0([2018.03.06]())
+- 【优化】支持更多格式的ts命名
 
 v2.1.9([2017.11.21]())
 - 【优化】支持url重定向处理过的m3u8

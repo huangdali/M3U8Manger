@@ -20,6 +20,10 @@ public class M3U8Ts implements Comparable<M3U8Ts> {
         return file;
     }
 
+    public String getFileName() {
+        return file.substring(file.lastIndexOf("/") + 1);
+    }
+
     public void setFile(String file) {
         this.file = file;
     }

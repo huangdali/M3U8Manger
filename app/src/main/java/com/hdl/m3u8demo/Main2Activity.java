@@ -18,7 +18,8 @@ import com.hdl.m3u8demo.runtimepermissions.PermissionsResultAction;
 
 public class Main2Activity extends AppCompatActivity {
     //url随时可能失效
-    private String url = "http://suo.im/zAt2p1";
+    private String url = "http://qiniu.reee.cn/m3u8/match/170826/CG_match_599ff71aa4b470d69f647497_0/CA_599ff71aa4b470d69f647497_pgc_0_170826110500/dd85027258384141b0b7ed1483172bc3.m3u8";
+//    private String url = "http://oss.cloudlinks.cn/07754326_7844998_1001/1520265609466.m3u8?Expires=1520414234&OSSAccessKeyId=LTAIAxqhixFoJsvp&Signature=d0iBMPf%2BeaVZfOUJ32EhesDpuWE%3D&x-oss-process=hls%2Fsign";
 
     private TextView tvSpeed1;
     private EditText etUrl;
