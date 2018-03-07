@@ -14,7 +14,7 @@
 ## 体验app
 ### 扫描二维码：
 
-![](https://github.com/huangdali/M3U8Manger/blob/master/image6.png)
+![](https://github.com/huangdali/M3U8Manger/blob/v2.0.6/image6.png)
 
 ### 或打开下面的地址
 https://fir.im/2g5c
