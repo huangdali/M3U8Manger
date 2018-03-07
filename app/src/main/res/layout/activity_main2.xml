@@ -14,14 +14,33 @@
         android:hint="下载地址"
         android:singleLine="true" />
 
-    <Button
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="onGetInfo"
-        android:text="获取M3U8信息"
-        />
+        android:orientation="horizontal">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onGetInfo"
+            android:text="获取M3U8信息" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onLiveDownload"
+            android:text="直播缓存" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onGetLiveCache"
+            android:text="获取到当前时间的缓存" />
+    </LinearLayout>
+
 
     <TextView
+        android:id="@+id/tv_savepath_tip"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="默认保存在/sdcard/111/******.ts" />

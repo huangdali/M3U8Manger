@@ -29,4 +29,5 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha7'
     testCompile 'junit:junit:4.12'
     compile 'com.hdl:elog:v2.0.2'
+    compile 'com.github.huangdali:HPermission:v1.0.4'
 }

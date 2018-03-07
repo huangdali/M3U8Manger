@@ -8,6 +8,7 @@
 - 获取下载速度
 - 支持多任务下载
 - 支持url重定向处理过的m3u8
+- 支持直播缓存
 > **温馨提示：** 项目会一直维护， 请尽量通过issue渠道提bug和改进建议（绑定过邮箱，会第一时间回复）
 
 
@@ -34,7 +35,7 @@
 ### 导入：
 
 ```java
-compile 'com.jwkj:M3U8Manger:v2.2.3'
+compile 'com.jwkj:M3U8Manger:v2.3.0'
 ```
 
 ### 获取M3U8信息：
@@ -58,7 +59,7 @@ compile 'com.jwkj:M3U8Manger:v2.2.3'
         });
 ```
 
-
+## 点播下载
 ### 下载M3U8格式的视频文件：
 
 ```java
@@ -122,10 +123,69 @@ compile 'com.jwkj:M3U8Manger:v2.2.3'
       task1.stop();
 ```
 
+
+## 直播缓存
+
+### 开启缓存
+
+```java
+ String toFile="/sdcard/" + System.currentTimeMillis() + ".ts";
+        tvSaveFilePathTip.setText("缓存目录在：/sdcard/11m3u8/\n最终导出的缓存文件在："+toFile);
+        M3U8LiveManger.getInstance()
+                .setTempDir("/sdcard/11m3u8/")
+                .setSaveFile(toFile)//（设置导出缓存文件）必须以.ts结尾
+                .caching(url, new OnDownloadListener() {
+                    @Override
+                    public void onDownloading(long itemFileSize, int totalTs, int curTs) {
+                      //此回调只有curTs有意义，表示开始缓存第几个ts
+                    }
+
+                    @Override
+                    public void onSuccess() {
+                        //此回调没有什么意义
+                    }
+
+                    @Override
+                    public void onProgress(long curLength) {
+                        if (curLength - lastLength > 0) {
+                        //计算缓存速度
+                            final String speed = NetSpeedUtils.getInstance().displayFileSize(curLength - lastLength) + "/s";
+                            lastLength = curLength;
+                        }
+                    }
+
+                    @Override
+                    public void onStart() {
+                        //开始缓存
+                    }
+
+                    @Override
+                    public void onError(Throwable errorMsg) {
+                        //缓存出错了
+                    }
+                });
+```
+
+### 获取开始缓存到当前时间的ts文件
+```java
+ String filePath = M3U8LiveManger.getInstance().getCurrentTs();
+```
+
+> 温馨提示：此方法会自动合并当次任务所下载的所有ts文件，如果你不需要此方法，也可以使用com.hdl.m3u8.utils.MUtils.merge(java.util.List<java.io.File>, java.lang.String)方法来合并，当然自己写合并方法也是可以的
+
+### 停止缓存
+```java
+ M3U8LiveManger.getInstance().stop();
+```
+
+
 ## 版本记录
 
 ### v2.x
 
+
+v2.3.0([2018.03.07]())
+- 【新增】支持缓存直播类型的m3u8
 
 v2.2.3([2018.03.06]())
 - 【优化】支持更多格式的ts命名

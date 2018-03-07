@@ -2,6 +2,7 @@ package com.hdl.m3u8demo;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -9,21 +10,24 @@ import android.widget.TextView;
 import com.hdl.elog.ELog;
 import com.hdl.m3u8.M3U8DownloadTask;
 import com.hdl.m3u8.M3U8InfoManger;
+import com.hdl.m3u8.M3U8LiveManger;
 import com.hdl.m3u8.bean.M3U8;
 import com.hdl.m3u8.bean.OnDownloadListener;
 import com.hdl.m3u8.bean.OnM3U8InfoListener;
 import com.hdl.m3u8.utils.NetSpeedUtils;
-import com.hdl.m3u8demo.runtimepermissions.PermissionsManager;
-import com.hdl.m3u8demo.runtimepermissions.PermissionsResultAction;
+
+import hdl.com.lib.runtimepermissions.HPermissions;
+import hdl.com.lib.runtimepermissions.PermissionsResultAction;
 
 public class Main2Activity extends AppCompatActivity {
     //url随时可能失效
-    private String url = "http://qiniu.reee.cn/m3u8/match/170826/CG_match_599ff71aa4b470d69f647497_0/CA_599ff71aa4b470d69f647497_pgc_0_170826110500/dd85027258384141b0b7ed1483172bc3.m3u8";
+    private String url = "http://tvbilive7-i.akamaihd.net/hls/live/494651/CJHK4/CJHK4-06.m3u8";
 //    private String url = "http://oss.cloudlinks.cn/07754326_7844998_1001/1520265609466.m3u8?Expires=1520414234&OSSAccessKeyId=LTAIAxqhixFoJsvp&Signature=d0iBMPf%2BeaVZfOUJ32EhesDpuWE%3D&x-oss-process=hls%2Fsign";
 
     private TextView tvSpeed1;
     private EditText etUrl;
     private TextView tvConsole;
+    private TextView tvSaveFilePathTip;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,22 +36,24 @@ public class Main2Activity extends AppCompatActivity {
         requestPermission();
         tvSpeed1 = (TextView) findViewById(R.id.tv_speed1);
         etUrl = (EditText) findViewById(R.id.et_url);
+        etUrl.setText("http://tvbilive7-i.akamaihd.net/hls/live/494651/CJHK4/CJHK4-06.m3u8");
         tvConsole = (TextView) findViewById(R.id.tv_console);
+        tvSaveFilePathTip= (TextView) findViewById(R.id.tv_savepath_tip);
     }
 
     private void requestPermission() {
         /*
          * 请求所有必要的权限----
          */
-        PermissionsManager.getInstance().requestAllManifestPermissionsIfNecessary(this, new PermissionsResultAction() {
+        HPermissions.getInstance().requestAllManifestPermissionsIfNecessary(this, new PermissionsResultAction() {
             @Override
             public void onGranted() {
-//				Toast.makeText(MainActivity.this, "All permissions have been granted", Toast.LENGTH_SHORT).show();
+
             }
 
             @Override
             public void onDenied(String permission) {
-                //Toast.makeText(MainActivity.this, "Permission " + permission + " has been denied", Toast.LENGTH_SHORT).show();
+
             }
         });
     }
@@ -62,7 +68,7 @@ public class Main2Activity extends AppCompatActivity {
 
             @Override
             public void onStart() {
-                tvConsole.append("\n\n开始获取信息" );
+                tvConsole.append("\n\n开始获取信息");
                 ELog.e("开始获取信息");
             }
 
@@ -81,6 +87,7 @@ public class Main2Activity extends AppCompatActivity {
     public void onDownload(View view) {
 //        url = etUrl.getText().toString();
         task1.setSaveFilePath("/sdcard/111/" + System.currentTimeMillis() + ".ts");
+        tvSaveFilePathTip.setText("文件保存在：/sdcard/111/" + System.currentTimeMillis() + ".ts");
         task1.download(url, new OnDownloadListener() {
             @Override
             public void onDownloading(final long itemFileSize, final int totalTs, final int curTs) {
@@ -136,5 +143,67 @@ public class Main2Activity extends AppCompatActivity {
 
     public void onStopTask1(View view) {
         task1.stop();
+        M3U8LiveManger.getInstance().stop();
+    }
+
+    /**
+     * 当前正在下载的视频
+     */
+    private int curTsIndex;
+
+    public void onLiveDownload(View view) {
+//        String url = "http://tvbilive7-i.akamaihd.net/hls/live/494651/CJHK4/CJHK4-06.m3u8";
+        String url = etUrl.getText().toString().trim();
+        String toFile="/sdcard/" + System.currentTimeMillis() + ".ts";
+        tvSaveFilePathTip.setText("缓存目录在：/sdcard/11m3u8/\n最终导出的缓存文件在："+toFile);
+        M3U8LiveManger.getInstance()
+                .setTempDir("/sdcard/11m3u8/")
+                .setSaveFile(toFile)//（设置导出缓存文件）必须以.ts结尾
+                .caching(url, new OnDownloadListener() {
+                    @Override
+                    public void onDownloading(long itemFileSize, int totalTs, int curTs) {
+                        curTsIndex = curTs;
+                        tvConsole.append(String.format("\n\n下载中.....开始下载第 %s 个视频了", curTs));
+//                        tvConsole.setText("第 " + curTs + " 个视频下载中\n\n" + tvConsole.getText().toString());
+                    }
+
+                    @Override
+                    public void onSuccess() {
+
+                    }
+
+                    @Override
+                    public void onProgress(long curLength) {
+                        if (curLength - lastLength > 0) {
+                            final String speed = NetSpeedUtils.getInstance().displayFileSize(curLength - lastLength) + "/s";
+                            ELog.e(task1.getTaskId() + "speed = " + speed);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    ELog.e("更新了");
+                                    tvSpeed1.setText(speed + "( 第" + (curTsIndex + 1) + "个视频 )");
+                                    ELog.e(tvSpeed1.getText().toString());
+                                }
+                            });
+                            lastLength = curLength;
+                        }
+                    }
+
+                    @Override
+                    public void onStart() {
+                        tvConsole.append("\n\n开始缓存");
+                    }
+
+                    @Override
+                    public void onError(Throwable errorMsg) {
+                        tvConsole.append("\n\n缓存出错了" + errorMsg);
+                    }
+                });
+    }
+
+    public void onGetLiveCache(View view) {
+        String currentTs = M3U8LiveManger.getInstance().getCurrentTs();
+        tvConsole.append("\n\n缓存完成了，已经存至：" + currentTs);
+        Log.e("hdltag", "onGetLiveCache(Main2Activity.java:151): currentTs = " + currentTs);
     }
 }

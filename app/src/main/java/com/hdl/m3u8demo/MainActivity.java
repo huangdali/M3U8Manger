@@ -9,8 +9,9 @@ import android.widget.Toast;
 import com.hdl.m3u8.M3U8Manger;
 import com.hdl.m3u8.bean.M3U8;
 import com.hdl.m3u8.bean.M3U8Listener;
-import com.hdl.m3u8demo.runtimepermissions.PermissionsManager;
-import com.hdl.m3u8demo.runtimepermissions.PermissionsResultAction;
+
+import hdl.com.lib.runtimepermissions.HPermissions;
+import hdl.com.lib.runtimepermissions.PermissionsResultAction;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -21,15 +22,18 @@ public class MainActivity extends AppCompatActivity {
         /**
          * 请求所有必要的权限----
          */
-        PermissionsManager.getInstance().requestAllManifestPermissionsIfNecessary(this, new PermissionsResultAction() {
+        /*
+         * 请求所有必要的权限----
+         */
+        HPermissions.getInstance().requestAllManifestPermissionsIfNecessary(this, new PermissionsResultAction() {
             @Override
             public void onGranted() {
-//				Toast.makeText(MainActivity.this, "All permissions have been granted", Toast.LENGTH_SHORT).show();
+
             }
 
             @Override
             public void onDenied(String permission) {
-                //Toast.makeText(MainActivity.this, "Permission " + permission + " has been denied", Toast.LENGTH_SHORT).show();
+
             }
         });
     }

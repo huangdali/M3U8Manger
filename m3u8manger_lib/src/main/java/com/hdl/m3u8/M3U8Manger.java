@@ -292,7 +292,7 @@ public class M3U8Manger {
      * @throws IOException
      */
     private void download(final M3U8 m3u8, final String saveFileName) throws IOException {
-        Log.e("hdltag", "download(M3U8Manger.java:293):" + saveFileName);
+        Log.e("hdltag", "caching(M3U8Manger.java:293):" + saveFileName);
         final File dir = new File(saveFileName);
         if (!dir.exists()) {
             dir.mkdirs();
@@ -308,7 +308,7 @@ public class M3U8Manger {
                     @Override
                     public void run() {
                         try {
-//                        System.out.println("download " + (m3u8.getTsList().indexOf(ts) + 1) + "/"
+//                        System.out.println("caching " + (m3u8.getTsList().indexOf(ts) + 1) + "/"
 //                                + m3u8.getTsList().size() + ": " + ts);
                             if (isRunning()) {
                                 FileOutputStream writer = null;
@@ -341,7 +341,7 @@ public class M3U8Manger {
                                 msg.arg2 = currDownloadTsCount;
                                 mHandler.sendMessage(msg);
                             }
-//                        System.out.println("download ok for: " + ts);
+//                        System.out.println("caching ok for: " + ts);
                         } catch (IOException e) {
                             e.printStackTrace();
                             handlerError(e);

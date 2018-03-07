@@ -75,13 +75,33 @@ public class MUtils {
      * @param tofile
      * @throws IOException
      */
-    public static void merge(M3U8 m3u8, String tofile) throws IOException {
+    public static String merge(M3U8 m3u8, String tofile) throws IOException {
         List<M3U8Ts> mergeList = getLimitM3U8Ts(m3u8);
         File file = new File(tofile);
         FileOutputStream fos = new FileOutputStream(file);
 
         for (M3U8Ts ts : mergeList) {
             IOUtils.copyLarge(new FileInputStream(new File(file.getParentFile(), ts.getFileName())), fos);
+        }
+        fos.close();
+        return tofile;
+    }
+
+    /**
+     * 合并文件
+     *
+     * @param fileList 文件列表
+     * @param toFile   合并之后的文件
+     */
+    public static void merge(List<File> fileList, String toFile) throws IOException {
+        File file = new File(toFile);
+        File dir=file.getParentFile();
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        FileOutputStream fos = new FileOutputStream(file);
+        for (File tsFile : fileList) {
+            IOUtils.copyLarge(new FileInputStream(tsFile), fos);
         }
         fos.close();
     }
