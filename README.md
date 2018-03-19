@@ -1,4 +1,5 @@
-## M3U8Manger (M3U8管理器)[![License](https://img.shields.io/badge/license-Apache%202-green.svg)](https://www.apache.org/licenses/LICENSE-2.0) [![Download](https://api.bintray.com/packages/huangdali/jwkj/M3U8Manger/images/download.svg) ](https://bintray.com/huangdali/jwkj/M3U8Manger/_latestVersion)
+[![License](https://img.shields.io/badge/license-Apache%202-green.svg)](https://www.apache.org/licenses/LICENSE-2.0) [![Download](https://api.bintray.com/packages/huangdali/jwkj/M3U8Manger/images/download.svg) ](https://bintray.com/huangdali/jwkj/M3U8Manger/_latestVersion)
+## M3U8Manger (M3U8管理器)
 
 如果帮助到你，麻烦来个star，更欢迎你的fork
 
@@ -44,7 +45,7 @@ https://fir.im/2g5c
 ```
 
 
-### 导入：
+### 导入：最新版本是-->[![Download](https://api.bintray.com/packages/huangdali/jwkj/M3U8Manger/images/download.svg) ](https://bintray.com/huangdali/jwkj/M3U8Manger/_latestVersion)
 
 ```java
 compile 'com.jwkj:M3U8Manger:v2.3.1'
