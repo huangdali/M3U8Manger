@@ -45,10 +45,10 @@ https://fir.im/2g5c
 ```
 
 
-### 导入：最新版本是-->[![Download](https://api.bintray.com/packages/huangdali/jwkj/M3U8Manger/images/download.svg) ](https://bintray.com/huangdali/jwkj/M3U8Manger/_latestVersion)
+### 导入：
 
 ```java
-compile 'com.jwkj:M3U8Manger:v2.3.1'
+compile 'com.jwkj:M3U8Manger:v2.3.0'
 ```
 
 ### 获取M3U8信息：
@@ -196,9 +196,6 @@ compile 'com.jwkj:M3U8Manger:v2.3.1'
 
 ### v2.x
 
-
-v2.3.1([2018.03.19]())
-- 【修复】部分ts文件名过长导致下载文件失败问题
 
 v2.3.0([2018.03.07]())
 - 【新增】支持缓存直播类型的m3u8
