@@ -61,6 +61,11 @@
             android:layout_height="wrap_content"
             android:onClick="onStopTask1"
             android:text="停止" />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onMergin"
+            android:text="合并" />
 
         <TextView
             android:id="@+id/tv_speed1"

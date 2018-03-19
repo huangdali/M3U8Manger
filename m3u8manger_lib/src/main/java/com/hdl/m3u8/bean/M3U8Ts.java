@@ -20,8 +20,16 @@ public class M3U8Ts implements Comparable<M3U8Ts> {
         return file;
     }
 
+    /**
+     * 获取文件名字，支取***.ts
+     * @return
+     */
     public String getFileName() {
-        return file.substring(file.lastIndexOf("/") + 1);
+        String fileName = file.substring(file.lastIndexOf("/") + 1);
+        if (fileName.contains("?")) {
+            return fileName.substring(0, fileName.indexOf("?"));
+        }
+        return fileName;
     }
 
     public void setFile(String file) {

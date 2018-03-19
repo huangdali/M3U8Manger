@@ -3,7 +3,6 @@ package com.hdl.m3u8;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 
 import com.hdl.m3u8.bean.M3U8;
 import com.hdl.m3u8.bean.M3U8Ts;
@@ -275,7 +274,6 @@ public class M3U8DownloadTask {
                         FileOutputStream fos = null;
                         InputStream inputStream = null;
                         try {
-                            Log.e("hdltag", "run(M3U8DownloadTask.java:278):" + m3U8Ts.getFile());
                             String urlPath;
                             if ("http".equals(m3U8Ts.getFile().substring(0, 4))) {
                                 urlPath = m3U8Ts.getFile();
@@ -296,7 +294,6 @@ public class M3U8DownloadTask {
                                     curLenght += len;
                                     fos.write(buf, 0, len);//写入流中
                                 }
-//                                Log.e("hdltag", "run(M3U8DownloadTask.java:188):进度\t" + totalTs + "-----" + curTs);
                             } else {
                                 handlerError(new Throwable(String.valueOf(conn.getResponseCode())));
                             }
