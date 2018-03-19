@@ -1,5 +1,4 @@
-## M3U8Manger (M3U8管理器)[![License](https://img.shields.io/badge/license-Apache%202-green.svg)](https://www.apache.org/licenses/LICENSE-2.0)
-                       [![Download](https://api.bintray.com/packages/huangdali/jwkj/M3U8Manger/images/download.svg) ](https://bintray.com/huangdali/jwkj/M3U8Manger/_latestVersion)
+## M3U8Manger (M3U8管理器)[![License](https://img.shields.io/badge/license-Apache%202-green.svg)](https://www.apache.org/licenses/LICENSE-2.0) [![Download](https://api.bintray.com/packages/huangdali/jwkj/M3U8Manger/images/download.svg) ](https://bintray.com/huangdali/jwkj/M3U8Manger/_latestVersion)
 
 如果帮助到你，麻烦来个star，更欢迎你的fork
 
