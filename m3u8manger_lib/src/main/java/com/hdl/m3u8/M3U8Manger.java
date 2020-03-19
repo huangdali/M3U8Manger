@@ -315,7 +315,8 @@ public class M3U8Manger {
                                 long size = 0;
                                 try {
                                     writer = new FileOutputStream(new File(dir, ts.getFileName()));
-                                    size = IOUtils.copyLarge(new URL(m3u8.getBasepath() + ts.getFileName()).openStream(), writer);
+                                    String downloadPath = MUtils.getRealDownloadPath(m3u8.getBasepath(), ts.getFile());
+                                    size = IOUtils.copyLarge(new URL(downloadPath).openStream(), writer);
                                 } catch (InterruptedIOException exception) {
                                     isRunning = false;
                                     currDownloadTsCount = 0;
