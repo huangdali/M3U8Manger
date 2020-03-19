@@ -274,12 +274,7 @@ public class M3U8DownloadTask {
                         FileOutputStream fos = null;
                         InputStream inputStream = null;
                         try {
-                            String urlPath;
-                            if ("http".equals(m3U8Ts.getFile().substring(0, 4))) {
-                                urlPath = m3U8Ts.getFile();
-                            } else {
-                                urlPath = basePath + m3U8Ts.getFile();
-                            }
+                            String urlPath = MUtils.getRealDownloadPath(basePath, m3U8Ts.getFile());
                             URL url = new URL(urlPath);
 
                             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
