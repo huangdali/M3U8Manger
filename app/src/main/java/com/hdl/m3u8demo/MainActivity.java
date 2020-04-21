@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onDownload(View view) {
-        String url = "http://gwell-oss-test1.oss-cn-shenzhen.aliyuncs.com/video-123yun/1500541966-1500542510.m3u8?Expires=1502348254&OSSAccessKeyId=LTAIAxqhixFoJsvp&Signature=w1gZoVy2j066nwOC%2B49JzNhwErc%3D";
+        String url = "xxx";
         M3U8Manger.getInstance()
                 .setUrl(url)
                 .setSaveFilePath("/sdcard/11/" + System.currentTimeMillis() + ".ts")
