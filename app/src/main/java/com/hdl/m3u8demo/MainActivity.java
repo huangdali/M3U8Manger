@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onDownload1(View view) {
-        String url = "http://gwell-oss-test1.oss-cn-shenzhen.aliyuncs.com/video-123yun/1500541892-1500542032.m3u8";
+        String url = "xxx";
         M3U8Manger.getInstance()
                 .setUrl(url)
                 .setSaveFilePath("/sdcard/11/" + System.currentTimeMillis() + ".ts")
@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onGetInfo(View view) {
-        String url = "http://gwell-oss-test1.oss-cn-shenzhen.aliyuncs.com/video-123yun/2017-07-20%2017%3A00%3A00.m3u8?Expires=1501502790&OSSAccessKeyId=LTAIAxqhixFoJsvp&Signature=MfjA%2FuD7pWmoVXUgO3Uwn0YiOQU%3D";
+        String url = "xxx";
         M3U8Manger.getInstance()
                 .setUrl(url)
                 .getM3U8(new M3U8Listener() {
