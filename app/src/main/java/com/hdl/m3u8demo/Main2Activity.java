@@ -27,8 +27,8 @@ import hdl.com.lib.runtimepermissions.PermissionsResultAction;
 
 public class Main2Activity extends AppCompatActivity {
     //url随时可能失效
-    private String url = "http://oss.cloudlinks.cn/07754326_7844998_1001/1521390529-1521391086.m3u8?Expires=1521525430&OSSAccessKeyId=LTAIAxqhixFoJsvp&Signature=zJJ%2FTYOC%2B0MXQfv60xCwgNj08r8%3D&x-oss-process=hls%2Fsign";
-//    private String url = "http://oss.cloudlinks.cn/07754326_7844998_1001/1520265609466.m3u8?Expires=1520414234&OSSAccessKeyId=LTAIAxqhixFoJsvp&Signature=d0iBMPf%2BeaVZfOUJ32EhesDpuWE%3D&x-oss-process=hls%2Fsign";
+    private String url = "xxx";
+//    private String url = "xxx";
 
     private TextView tvSpeed1;
     private EditText etUrl;
