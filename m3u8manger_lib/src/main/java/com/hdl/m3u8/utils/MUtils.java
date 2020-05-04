@@ -19,6 +19,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * M3u8工具类
  * Created by HDL on 2017/7/24.
@@ -55,7 +58,8 @@ public class MUtils {
                     continue;
                 }
                 if (line.endsWith("m3u8")) {
-                    return parseIndex(basepath + line);
+                    String downloadPath = getRealDownloadPath(basepath, line);
+                    return parseIndex(downloadPath);
                 }
                 ret.addTs(new M3U8Ts(line, seconds));
                 seconds = 0;
@@ -156,6 +160,32 @@ public class MUtils {
                 dir.delete();// 删除文件夹
             }
         }
+    }
+
+
+    /**
+     * 获取真正的ts下载地址
+     *
+     * @param basePath
+     * @param filePath
+     */
+    public static String getRealDownloadPath (String basePath, String filePath) {
+
+        if (filePath.startsWith("http")) {//如果是完成的http路径，则不需要变更
+            return filePath;
+
+        } else if (filePath.startsWith("/")) {//根开头
+            //截取basePath的host
+            String host = "";
+            Pattern patHost =  Pattern.compile("(http://|https://)?([^/]*)");
+            Matcher matHost = patHost.matcher(basePath); 
+            if(matHost.find()){
+                host = matHost.group(0); 
+            }
+            return host + filePath;
+        }
+
+        return basePath + filePath;
     }
 
     /**
